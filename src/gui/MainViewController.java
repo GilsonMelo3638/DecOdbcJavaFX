@@ -15,6 +15,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
+import model.services.DepartmentService;
 
 public class MainViewController implements Initializable {
 
@@ -30,7 +31,7 @@ public class MainViewController implements Initializable {
 	}
 
 	public void onMenuItemDepartmentAction() {
-		loadView("/gui/DepartmentList.fxml");
+		loadView2("/gui/DepartmentList.fxml");
 	}
 
 	public void onMenuItemAboutAction() {
@@ -43,18 +44,42 @@ public class MainViewController implements Initializable {
 
 	}
 
-	public synchronized void  loadView(String absoluteName) {
+	public synchronized void loadView(String absoluteName) {
 		try {
 			FXMLLoader loader = new FXMLLoader(getClass().getResource(absoluteName));
 			VBox newVBox = loader.load();
-			
+
 			Scene mainScene = Main.getMainScene();
-			VBox mainVBox = (VBox)((ScrollPane) mainScene.getRoot()).getContent();
-			
+			VBox mainVBox = (VBox) ((ScrollPane) mainScene.getRoot()).getContent();
+
 			Node mainMenu = mainVBox.getChildren().get(0);
 			mainVBox.getChildren().clear();
 			mainVBox.getChildren().add(mainMenu);
 			mainVBox.getChildren().addAll(newVBox.getChildren());
+		}
+
+		catch (IOException e) {
+			Alerts.showAlert("IO Exception", "Error loading view", e.getMessage(), AlertType.ERROR);
+
+		}
+	}
+
+	public synchronized void loadView2(String absoluteName) {
+		try {
+			FXMLLoader loader = new FXMLLoader(getClass().getResource(absoluteName));
+			VBox newVBox = loader.load();
+
+			Scene mainScene = Main.getMainScene();
+			VBox mainVBox = (VBox) ((ScrollPane) mainScene.getRoot()).getContent();
+
+			Node mainMenu = mainVBox.getChildren().get(0);
+			mainVBox.getChildren().clear();
+			mainVBox.getChildren().add(mainMenu);
+			mainVBox.getChildren().addAll(newVBox.getChildren());
+			
+			DepartmentListController controller = loader.getController();
+			controller.setDepartmentService(new DepartmentService());
+			controller.updateTableView();
 
 		}
 
