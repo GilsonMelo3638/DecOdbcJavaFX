@@ -1,6 +1,7 @@
 package gui;
 
 import java.net.URL;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -28,7 +29,7 @@ import model.entities.Seller;
 import model.services.SellerService;
 
 public class SellerListController implements Initializable, DataChangeListener {
-
+	
 	private SellerService service;
 
 	@FXML
@@ -41,6 +42,15 @@ public class SellerListController implements Initializable, DataChangeListener {
 	private TableColumn<Seller, String> tableColumnName;
 
 	@FXML
+	private TableColumn<Seller, String> tableColumnEmail;
+
+	@FXML
+	private TableColumn<Seller, Date> tableColumnBirthDate;
+
+	@FXML
+	private TableColumn<Seller, Double> tableColumnBaseSalary;
+
+	@FXML
 	private TableColumn<Seller, Seller> tableColumnEDIT;
 
 	@FXML
@@ -51,7 +61,8 @@ public class SellerListController implements Initializable, DataChangeListener {
 
 	private ObservableList<Seller> obsList;
 
-	// Método chamado quando o botão "New" é acionado para adicionar um novo vendedor.
+	// Método chamado quando o botão "New" é acionado para adicionar um novo
+	// vendedor.
 	@FXML
 	public void onBtNewAction(ActionEvent event) {
 		Stage parentStage = Utils.currentStage(event);
@@ -74,6 +85,11 @@ public class SellerListController implements Initializable, DataChangeListener {
 	private void initializeNodes() {
 		tableColumnId.setCellValueFactory(new PropertyValueFactory<>("id"));
 		tableColumnName.setCellValueFactory(new PropertyValueFactory<>("name"));
+		tableColumnEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
+		tableColumnBirthDate.setCellValueFactory(new PropertyValueFactory<>("birthDate"));
+		Utils.formatTableColumnDate(tableColumnBirthDate, "dd/MM/yyyy");
+		tableColumnBaseSalary.setCellValueFactory(new PropertyValueFactory<>("baseSalary"));
+		Utils.formatTableColumnDouble(tableColumnBaseSalary, 2);
 
 		Stage stage = (Stage) Main.getMainScene().getWindow();
 		tableViewSeller.prefHeightProperty().bind(stage.heightProperty());
