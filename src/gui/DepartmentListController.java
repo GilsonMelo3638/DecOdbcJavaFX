@@ -3,9 +3,11 @@ package gui;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 import application.Main;
+import db.DbIntegrityException;
 import gui.listeners.DataChangeListener;
 import gui.util.Alerts;
 import gui.util.Utils;
@@ -19,6 +21,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -33,7 +36,6 @@ public class DepartmentListController implements Initializable, DataChangeListen
 
 	private DepartmentService service;
 
-	// Anotações @FXML para conectar elementos da GUI com o código
 	@FXML
 	private TableView<Department> tableViewDepartment;
 
@@ -47,11 +49,14 @@ public class DepartmentListController implements Initializable, DataChangeListen
 	private TableColumn<Department, Department> tableColumnEDIT;
 
 	@FXML
+	private TableColumn<Department, Department> tableColumnREMOVE;
+
+	@FXML
 	private Button btNew;
 
 	private ObservableList<Department> obsList;
 
-	// Método que é executado quando o botão "btNew" é clicado
+	// Método chamado quando o botão "New" é acionado para adicionar um novo departamento.
 	@FXML
 	public void onBtNewAction(ActionEvent event) {
 		Stage parentStage = Utils.currentStage(event);
@@ -59,23 +64,27 @@ public class DepartmentListController implements Initializable, DataChangeListen
 		createDialogForm(obj, "/gui/DepartmentForm.fxml", parentStage);
 	}
 
+	// Define o serviço de departamento.
 	public void setDepartmentService(DepartmentService service) {
 		this.service = service;
 	}
 
-	// Método para inicializar os elementos da GUI
+	// Inicialização do controlador.
+	@Override
+	public void initialize(URL url, ResourceBundle rb) {
+		initializeNodes();
+	}
+
+	// Inicializa os nós da tabela.
 	private void initializeNodes() {
-		// Configura como as colunas da tabela se relacionam com as propriedades do
-		// objeto Department
 		tableColumnId.setCellValueFactory(new PropertyValueFactory<>("id"));
 		tableColumnName.setCellValueFactory(new PropertyValueFactory<>("name"));
 
-		// Obtém a instância da janela principal e vincula a altura preferida da tabela
-		// à altura da janela
 		Stage stage = (Stage) Main.getMainScene().getWindow();
 		tableViewDepartment.prefHeightProperty().bind(stage.heightProperty());
 	}
 
+	// Atualiza a tabela de departamentos.
 	public void updateTableView() {
 		if (service == null) {
 			throw new IllegalStateException("Service was null");
@@ -84,15 +93,10 @@ public class DepartmentListController implements Initializable, DataChangeListen
 		obsList = FXCollections.observableArrayList(list);
 		tableViewDepartment.setItems(obsList);
 		initEditButtons();
+		initRemoveButtons();
 	}
 
-	// Construtor da classe que implementa a interface Initializable
-	@Override
-	public void initialize(URL uri, ResourceBundle rb) {
-		// Chama o método para inicializar os elementos da interface gráfica (GUI)
-		initializeNodes();
-	}
-
+	// Cria um formulário de diálogo para adicionar ou editar um departamento.
 	private void createDialogForm(Department obj, String absoluteName, Stage parentStage) {
 		try {
 			FXMLLoader loader = new FXMLLoader(getClass().getResource(absoluteName));
@@ -117,11 +121,13 @@ public class DepartmentListController implements Initializable, DataChangeListen
 		}
 	}
 
+	// Chamado quando os dados são alterados.
 	@Override
 	public void onDataChanged() {
 		updateTableView();
 	}
 
+	// Inicializa os botões de edição.
 	private void initEditButtons() {
 		tableColumnEDIT.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
 		tableColumnEDIT.setCellFactory(param -> new TableCell<Department, Department>() {
@@ -135,10 +141,44 @@ public class DepartmentListController implements Initializable, DataChangeListen
 					return;
 				}
 				setGraphic(button);
-				button.setOnAction(
-						event -> createDialogForm(obj, "/gui/DepartmentForm.fxml", Utils.currentStage(event)));
+				button.setOnAction(event -> createDialogForm(obj, "/gui/DepartmentForm.fxml", Utils.currentStage(event)));
 			}
 		});
 	}
 
+	// Inicializa os botões de remoção.
+	private void initRemoveButtons() {
+		tableColumnREMOVE.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
+		tableColumnREMOVE.setCellFactory(param -> new TableCell<Department, Department>() {
+			private final Button button = new Button("remove");
+
+			@Override
+			protected void updateItem(Department obj, boolean empty) {
+				super.updateItem(obj, empty);
+				if (obj == null) {
+					setGraphic(null);
+					return;
+				}
+				setGraphic(button);
+				button.setOnAction(event -> removeEntity(obj));
+			}
+		});
+	}
+
+	// Remove um departamento após confirmação.
+	private void removeEntity(Department obj) {
+		Optional<ButtonType> result = Alerts.showConfirmation("Confirmation", "Are you sure to delete?");
+
+		if (result.get() == ButtonType.OK) {
+			if (service == null) {
+				throw new IllegalStateException("Service was null");
+			}
+			try {
+				service.remove(obj);
+				updateTableView();
+			} catch (DbIntegrityException e) {
+				Alerts.showAlert("Error removing object", null, e.getMessage(), AlertType.ERROR);
+			}
+		}
+	}
 }
