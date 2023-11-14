@@ -1,6 +1,10 @@
 package gui;
 
 import java.net.URL;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -22,31 +26,55 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.util.StringConverter;
 import model.entities.Agenda;
 import model.exceptions.ValidationException;
 import model.services.AgendaService;
 
 public class AgendaFormController implements Initializable {
+	
+    public void updateFormData() {
+        if (entity == null) {
+            throw new IllegalStateException("Entity was null");
+        }
+        txtCodigo.setText(String.valueOf(entity.getCod_agenda_extracao()));
+        comboTipo.setValue(entity.getTipo_doc());
+        // outros campos...
+
+        // Adicione o código para preencher o comboSituacao com o valor da entidade
+        comboSituacao.setValue(entity.getInd_situacao());
+    }
 
     private Agenda entity;
-
     private AgendaService service;
-
     private List<DataChangeListener> dataChangeListeners = new ArrayList<>();
 
     @FXML
     private TextField txtCodigo;
 
     @FXML
-    private ComboBox<TipoDoc> comboTipo;
-
-    @FXML
     private TextField txtInicio;
 
     @FXML
     private TextField txtFim;
+
+    @FXML
+    private ComboBox<TipoDoc> comboTipo;
+
+    @FXML
+    private DatePicker datePickerInicio;
+
+    @FXML
+    private ComboBox<Integer> comboHoraInicio;
+
+    @FXML
+    private DatePicker datePickerFim;
+
+    @FXML
+    private ComboBox<Integer> comboHoraFim;
 
     @FXML
     private ComboBox<SituacaoProcessamento> comboSituacao;
@@ -129,6 +157,60 @@ public class AgendaFormController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         initializeNodes();
+                
+        // Adiciona um ouvinte de mudança de valor ao datePickerInicio
+        datePickerInicio.valueProperty().addListener((observable, oldValue, newValue) -> {
+            // Define a mesma data no datePickerFim quando a data do datePickerInicio for alterada
+            datePickerFim.setValue(newValue);
+        });
+
+        // Adicionar ouvintes para datePickerInicio e comboHoraInicio
+        datePickerInicio.valueProperty().addListener((observable, oldValue, newValue) -> updateTxtDateTime(
+                comboHoraInicio, datePickerInicio, txtInicio, "%02d:00:00"
+        ));
+        comboHoraInicio.valueProperty().addListener((observable, oldValue, newValue) -> updateTxtDateTime(
+                comboHoraInicio, datePickerInicio, txtInicio, "%02d:00:00"
+        ));
+        
+        
+        // Inicialize o ComboBox com os valores do Enum TipoDoc
+        ObservableList<TipoDoc> tipoDocList = FXCollections.observableArrayList(TipoDoc.values());
+        comboTipo.setItems(tipoDocList);
+
+
+        // Inicialize o ComboBox com os valores do Enum SituacaoProcessamento
+        ObservableList<SituacaoProcessamento> situacaoList = FXCollections.observableArrayList(SituacaoProcessamento.values());
+        comboSituacao.setItems(situacaoList);
+
+        // Adia a definição do valor padrão para o evento onShown do ComboBox
+        comboSituacao.setOnShown(event -> {
+            SituacaoProcessamento valorPadrao = SituacaoProcessamento.AGENDADO;
+            if (situacaoList.contains(valorPadrao)) {
+                comboSituacao.getSelectionModel().select(valorPadrao);
+            }
+        });
+        
+        
+        // Inicialize os ComboBoxes de hora
+        ObservableList<Integer> horas = FXCollections.observableArrayList();
+
+        for (int i = 0; i <= 23; i++) {
+            horas.add(i);
+        }
+
+        comboHoraInicio.setItems(horas);
+        comboHoraInicio.setValue(horas.get(0)); // Define o primeiro valor como padrão
+
+        comboHoraFim.setItems(horas);
+        comboHoraFim.setValue(horas.get(horas.size() - 1)); // Define o último valor como padrão
+
+        // Adicionar ouvintes para datePickerFim e comboHoraFim
+        datePickerFim.valueProperty().addListener((observable, oldValue, newValue) -> updateTxtDateTime(
+                comboHoraFim, datePickerFim, txtFim, "%02d:59:59"
+        ));
+        comboHoraFim.valueProperty().addListener((observable, oldValue, newValue) -> updateTxtDateTime(
+                comboHoraFim, datePickerFim, txtFim, "%02d:59:59"
+        ));
     }
 
     private void initializeNodes() {
@@ -139,42 +221,68 @@ public class AgendaFormController implements Initializable {
         comboTipo.setItems(tipoDocList);
 
         // Inicialize o ComboBox com os valores do Enum SituacaoProcessamento
-        ObservableList<SituacaoProcessamento> situacaoList = FXCollections.observableArrayList(SituacaoProcessamento.values());
+        ObservableList<SituacaoProcessamento> situacaoList = FXCollections
+                .observableArrayList(SituacaoProcessamento.values());
         comboSituacao.setItems(situacaoList);
+
+        // Preencher as ComboBox de horas
+        ObservableList<Integer> horas = FXCollections.observableArrayList();
+
+        for (int i = 0; i <= 23; i++) {
+            horas.add(i);
+        }
+
+        setupHoraComboBox(comboHoraInicio, "%02d:00:00");
+        setupHoraComboBox(comboHoraFim, "%02d:59:59");
+
+        // Formatar a exibição das horas
+        comboHoraInicio.setItems(horas);
+        comboHoraFim.setItems(horas);
     }
 
-    public void updateFormData() {
-        if (entity == null) {
-            throw new IllegalStateException("Entity was null");
-        }
+    // Método genérico para atualizar o campo de texto com base nos valores selecionados
+    private void updateTxtDateTime(ComboBox<Integer> comboHora, DatePicker datePicker, TextField textField,
+            String formatoHora) {
+        LocalDate data = datePicker.getValue();
+        Integer hora = comboHora.getValue();
 
-        txtCodigo.setText(String.valueOf(entity.getCod_agenda_extracao()));
+        if (data != null && hora != null) {
+            LocalDateTime dataHora = LocalDateTime.of(data, LocalTime.of(hora, 0));
 
-        if (entity.getTipo_doc() != null) {
-            comboTipo.setValue(entity.getTipo_doc());
+            // Formatar a data e hora como desejado (exemplo: "yyyy-MM-dd HH:mm:ss")
+            String formato = "yyyy-MM-dd HH:mm:ss";
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(formato);
+            String resultadoFormatado = dataHora.format(formatter);
+
+            // Atualizar o campo de texto
+            textField.setText(resultadoFormatado);
         } else {
-            comboTipo.getSelectionModel().clearSelection();
+            // Lógica de tratamento para valores nulos, se necessário
+            textField.clear(); // Limpar o campo se algum dos valores for nulo
+        }
+    }
+
+    // Método genérico para configurar a ComboBox de hora
+    private void setupHoraComboBox(ComboBox<Integer> comboBox, String formato) {
+        ObservableList<Integer> horas = FXCollections.observableArrayList();
+
+        for (int i = 0; i <= 23; i++) {
+            horas.add(i);
         }
 
-        // Adicione a lógica para o campo Par_inicio
-        if (entity.getPar_inicio() != null) {
-            // Assumindo que o campo de início é do tipo Date ou algo semelhante
-            // Você pode precisar converter para a representação de texto desejada
-            txtInicio.setText(entity.getPar_inicio().toString());
-        } else {
-            // Lide com o caso em que o campo de início é nulo
-            txtInicio.setText("");
-        }
+        comboBox.setItems(horas);
+        comboBox.setConverter(new StringConverter<Integer>() {
+            @Override
+            public String toString(Integer hora) {
+                return String.format(formato, hora);
+            }
 
-        // Adicione a lógica para o campo Par_fim
-        if (entity.getPar_fim() != null) {
-            // Assumindo que o campo de início é do tipo Date ou algo semelhante
-            // Você pode precisar converter para a representação de texto desejada
-            txtFim.setText(entity.getPar_fim().toString());
-        } else {
-            // Lide com o caso em que o campo de início é nulo
-            txtFim.setText("");
-        }
+            @Override
+            public Integer fromString(String string) {
+                // Implemente a conversão inversa, se necessário
+                return null;
+            }
+        });
     }
 
     private void setErrorMessages(Map<String, String> errors) {
