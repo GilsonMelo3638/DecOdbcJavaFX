@@ -14,11 +14,14 @@ import gui.listeners.DataChangeListener;
 import gui.util.Alerts;
 import gui.util.Constraints;
 import gui.util.Utils;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import model.entities.Agenda;
@@ -27,184 +30,158 @@ import model.services.AgendaService;
 
 public class AgendaFormController implements Initializable {
 
-	private Agenda entity;
+    private Agenda entity;
 
-	private AgendaService service;
+    private AgendaService service;
 
-	private List<DataChangeListener> dataChangeListeners = new ArrayList<>();
-	
-	@FXML
-	private TextField txtCodigo;
+    private List<DataChangeListener> dataChangeListeners = new ArrayList<>();
 
-	@FXML
-	private TextField txtTipo;
-	
-	@FXML
-	private TextField txtInicio;
-	
-	@FXML
-	private TextField txtFim;
-	
-	@FXML
-	private TextField txtSituacao;
-	
-	@FXML
-	private TextField txt;
+    @FXML
+    private TextField txtCodigo;
 
-	@FXML
-	private Label labelErrorTipo;
+    @FXML
+    private ComboBox<TipoDoc> comboTipo;
 
-	@FXML
-	private Button btSave;
+    @FXML
+    private TextField txtInicio;
 
-	@FXML
-	private Button btCancel;
+    @FXML
+    private TextField txtFim;
 
-	public void setAgenda(Agenda entity) {
-		this.entity = entity;
-	}
+    @FXML
+    private ComboBox<SituacaoProcessamento> comboSituacao;
 
-	public void setAgendaService(AgendaService service) {
-		this.service = service;
-	}
+    @FXML
+    private Label labelErrorTipo;
 
-	public void subscribeDataChangeListener(DataChangeListener listener) {
-		dataChangeListeners.add(listener);
-	}
+    @FXML
+    private Button btSave;
 
-	@FXML
-	public void onBtSaveAction(ActionEvent event) {
-		if (entity == null) {
-			throw new IllegalStateException("Entity was null");
-		}
-		if (service == null) {
-			throw new IllegalStateException("Service was null");
-		}
-		try {
-			entity = getFormData();
-			service.saveOrUpdate(entity);
-			notifyDataChangeListeners();
-			Utils.currentStage(event).close();
-		} catch (ValidationException e) {
-			setErrorMessages(e.getErrors());
-		} catch (DbException e) {
-			Alerts.showAlert("Error saving object", null, e.getMessage(), AlertType.ERROR);
-		}
-	}
+    @FXML
+    private Button btCancel;
 
-	private void notifyDataChangeListeners() {
-		for (DataChangeListener listener : dataChangeListeners) {
-			listener.onDataChanged();
-		}
-	}
+    public void setAgenda(Agenda entity) {
+        this.entity = entity;
+    }
 
-	private Agenda getFormData() {
-	    Agenda obj = new Agenda();
-	    ValidationException exception = new ValidationException("Validation error");
+    public void setAgendaService(AgendaService service) {
+        this.service = service;
+    }
 
-	    obj.setCod_agenda_extracao(Utils.tryParseToInt(txtCodigo.getText()));
+    public void subscribeDataChangeListener(DataChangeListener listener) {
+        dataChangeListeners.add(listener);
+    }
 
-	    if (txtTipo.getText() == null || txtTipo.getText().trim().equals("")) {
-	        exception.addError("name", "Field can't be empty");
-	    } else {
-	        try {
-	            // Tente converter a string para o enumerado TipoDocumento
-	            TipoDoc tipoDocumento = TipoDoc.valueOf(txtTipo.getText().toUpperCase());
-	            obj.setTipo_doc(tipoDocumento);
-	        } catch (IllegalArgumentException e) {
-	            // Se a conversão falhar, adicione um erro à exceção
-	            exception.addError("tipo_doc", "Invalid document type");
-	        }
-	    }
+    @FXML
+    public void onBtSaveAction(ActionEvent event) {
+        if (entity == null) {
+            throw new IllegalStateException("Entity was null");
+        }
+        if (service == null) {
+            throw new IllegalStateException("Service was null");
+        }
+        try {
+            entity = getFormData();
+            service.saveOrUpdate(entity);
+            notifyDataChangeListeners();
+            Utils.currentStage(event).close();
+        } catch (ValidationException e) {
+            setErrorMessages(e.getErrors());
+        } catch (DbException e) {
+            Alerts.showAlert("Error saving object", null, e.getMessage(), AlertType.ERROR);
+        }
+    }
 
-	    // Adicione o código para o novo enumerado
-	    if (txtSituacao.getText() == null || txtSituacao.getText().trim().equals("")) {
-	        exception.addError("situacao", "Field can't be empty");
-	    } else {
-	        try {
-	            // Tente converter a string para o enumerado SituacaoProcessamento
-	            SituacaoProcessamento situacao = SituacaoProcessamento.valueOf(txtSituacao.getText().toUpperCase());
-	            obj.setInd_situacao(situacao);
-	        } catch (IllegalArgumentException e) {
-	            // Se a conversão falhar, adicione um erro à exceção
-	            exception.addError("situacao", "Invalid processing status");
-	        }
-	    }
+    private void notifyDataChangeListeners() {
+        for (DataChangeListener listener : dataChangeListeners) {
+            listener.onDataChanged();
+        }
+    }
 
-	    if (exception.getErrors().size() > 0) {
-	        throw exception;
-	    }
+    private Agenda getFormData() {
+        Agenda obj = new Agenda();
+        ValidationException exception = new ValidationException("Validation error");
 
-	    return obj;
-	}
+        obj.setCod_agenda_extracao(Utils.tryParseToInt(txtCodigo.getText()));
 
+        TipoDoc tipoDocumento = comboTipo.getValue();
+        obj.setTipo_doc(tipoDocumento);
 
-	@FXML
-	public void onBtCancelAction(ActionEvent event) {
-		Utils.currentStage(event).close();
-	}
+        // Adicione o código para o novo enumerado
+        if (comboSituacao.getValue() == null) {
+            exception.addError("situacao", "Field can't be empty");
+        } else {
+            obj.setInd_situacao(comboSituacao.getValue());
+        }
 
-	@Override
-	public void initialize(URL url, ResourceBundle rb) {
-		initializeNodes();
-	}
+        if (exception.getErrors().size() > 0) {
+            throw exception;
+        }
 
-	private void initializeNodes() {
-		Constraints.setTextFieldInteger(txtCodigo);
-		Constraints.setTextFieldMaxLength(txtTipo, 30);
-	}
+        return obj;
+    }
 
-	public void updateFormData() {
-	    if (entity == null) {
-	        throw new IllegalStateException("Entity was null");
-	    }
+    @FXML
+    public void onBtCancelAction(ActionEvent event) {
+        Utils.currentStage(event).close();
+    }
 
-	    txtCodigo.setText(String.valueOf(entity.getCod_agenda_extracao()));
+    @Override
+    public void initialize(URL url, ResourceBundle rb) {
+        initializeNodes();
+    }
 
-	    // Verifique se o tipo de documento não é nulo antes de tentar converter para texto
-	    if (entity.getTipo_doc() != null) {
-	        txtTipo.setText(entity.getTipo_doc().toString());
-	    } else {
-	        // Lide com o caso em que o tipo de documento é nulo
-	        txtTipo.setText("");
-	    }
+    private void initializeNodes() {
+        Constraints.setTextFieldInteger(txtCodigo);
 
-	    // Verifique se a situacao não é nulo antes de tentar converter para texto
-	    if (entity.getInd_situacao() != null) {
-	        txtSituacao.setText(entity.getInd_situacao().toString());
-	    } else {
-	        // Lide com o caso em que a situação é nula
-	        txtSituacao.setText("");
-	    }
+        // Inicialize o ComboBox com os valores do Enum TipoDoc
+        ObservableList<TipoDoc> tipoDocList = FXCollections.observableArrayList(TipoDoc.values());
+        comboTipo.setItems(tipoDocList);
 
-	    // Adicione a lógica para o campo Par_inicio
-	    if (entity.getPar_inicio() != null) {
-	        // Assumindo que o campo de início é do tipo Date ou algo semelhante
-	        // Você pode precisar converter para a representação de texto desejada
-	        txtInicio.setText(entity.getPar_inicio().toString());
-	    } else {
-	        // Lide com o caso em que o campo de início é nulo
-	        txtInicio.setText("");
-	    }
-	    
-	      // Adicione a lógica para o campo Par_fim
-	    if (entity.getPar_fim() != null) {
-	        // Assumindo que o campo de início é do tipo Date ou algo semelhante
-	        // Você pode precisar converter para a representação de texto desejada
-	        txtFim.setText(entity.getPar_fim().toString());
-	    } else {
-	        // Lide com o caso em que o campo de início é nulo
-	        txtFim.setText("");
-	    }
-	}
+        // Inicialize o ComboBox com os valores do Enum SituacaoProcessamento
+        ObservableList<SituacaoProcessamento> situacaoList = FXCollections.observableArrayList(SituacaoProcessamento.values());
+        comboSituacao.setItems(situacaoList);
+    }
 
+    public void updateFormData() {
+        if (entity == null) {
+            throw new IllegalStateException("Entity was null");
+        }
 
+        txtCodigo.setText(String.valueOf(entity.getCod_agenda_extracao()));
 
-	private void setErrorMessages(Map<String, String> errors) {
-		Set<String> fields = errors.keySet();
+        if (entity.getTipo_doc() != null) {
+            comboTipo.setValue(entity.getTipo_doc());
+        } else {
+            comboTipo.getSelectionModel().clearSelection();
+        }
 
-		if (fields.contains("name")) {
-			labelErrorTipo.setText(errors.get("name"));
-		}
-	}
+        // Adicione a lógica para o campo Par_inicio
+        if (entity.getPar_inicio() != null) {
+            // Assumindo que o campo de início é do tipo Date ou algo semelhante
+            // Você pode precisar converter para a representação de texto desejada
+            txtInicio.setText(entity.getPar_inicio().toString());
+        } else {
+            // Lide com o caso em que o campo de início é nulo
+            txtInicio.setText("");
+        }
+
+        // Adicione a lógica para o campo Par_fim
+        if (entity.getPar_fim() != null) {
+            // Assumindo que o campo de início é do tipo Date ou algo semelhante
+            // Você pode precisar converter para a representação de texto desejada
+            txtFim.setText(entity.getPar_fim().toString());
+        } else {
+            // Lide com o caso em que o campo de início é nulo
+            txtFim.setText("");
+        }
+    }
+
+    private void setErrorMessages(Map<String, String> errors) {
+        Set<String> fields = errors.keySet();
+
+        if (fields.contains("name")) {
+            labelErrorTipo.setText(errors.get("name"));
+        }
+    }
 }

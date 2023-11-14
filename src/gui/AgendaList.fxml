@@ -31,8 +31,8 @@
 				<TableColumn fx:id="tableColumnInicio" prefWidth="177.0" text="Inicio" />
 				<TableColumn fx:id="tableColumnFim" prefWidth="178.0" text="Fim" />
 				<TableColumn fx:id="tableColumnSituacao" prefWidth="172.0" text="Situacao" />					
-				<TableColumn fx:id="tableColumnEDIT" minWidth="0.0" prefWidth="392.0" />
-				<TableColumn fx:id="tableColumnREMOVE" minWidth="0.0" prefWidth="20.0" />
+				<TableColumn fx:id="tableColumnEDIT" minWidth="0.0" />
+				<TableColumn fx:id="tableColumnREMOVE" minWidth="0.0" />
 			</columns>
 		</TableView>
 	</children>
