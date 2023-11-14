@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1400.0" prefWidth="2200.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.AgendaListController">
+	<children>
+		<Label text="Agendamento Registration">
+			<font>
+				<Font name="System Bold" size="14.0" />
+			</font>
+			<padding>
+				<Insets left="5.0" top="5.0" />
+			</padding>
+		</Label>
+		<ToolBar prefHeight="40.0" prefWidth="200.0">
+			<items>
+				<Button fx:id="btNew" mnemonicParsing="false" onAction="#onBtNewAction" text="New" />
+			</items>
+		</ToolBar>
+		<TableView fx:id="tableViewAgenda" prefHeight="300.0" prefWidth="200.0">
+			<columns>
+				<TableColumn fx:id="tableColumnCodigo" minWidth="-1.0" prefWidth="90.0" text="Codigo" />
+				<TableColumn fx:id="tableColumnTipo" minWidth="0.0" prefWidth="110.0" text="Tipo" />
+				<TableColumn fx:id="tableColumnInicio" prefWidth="177.0" text="Inicio" />
+				<TableColumn fx:id="tableColumnFim" prefWidth="178.0" text="Fim" />
+				<TableColumn fx:id="tableColumnSituacao" prefWidth="172.0" text="Situacao" />					
+				<TableColumn fx:id="tableColumnEDIT" minWidth="0.0" prefWidth="392.0" />
+				<TableColumn fx:id="tableColumnREMOVE" minWidth="0.0" prefWidth="20.0" />
+			</columns>
+		</TableView>
+	</children>
+</VBox>

@@ -29,43 +29,53 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.Pane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import model.entities.Department;
-import model.services.DepartmentService;
+import model.entities.Agenda;
+import model.services.AgendaService;
 
-public class DepartmentListController implements Initializable, DataChangeListener {
+public class AgendaListController implements Initializable, DataChangeListener {
 
-	private DepartmentService service;
-
-	@FXML
-	private TableView<Department> tableViewDepartment;
+	private AgendaService service;
 
 	@FXML
-	private TableColumn<Department, Integer> tableColumnId;
+	private TableView<Agenda> tableViewAgenda;
 
 	@FXML
-	private TableColumn<Department, String> tableColumnName;
+	private TableColumn<Agenda, Long> tableColumnCodigo;
 
 	@FXML
-	private TableColumn<Department, Department> tableColumnEDIT;
+	private TableColumn<Agenda, String> tableColumnTipo;
 
 	@FXML
-	private TableColumn<Department, Department> tableColumnREMOVE;
+	private TableColumn<Agenda, String> tableColumnInicio;
+
+	@FXML
+	private TableColumn<Agenda, String> tableColumnFim;
+
+	@FXML
+	private TableColumn<Agenda, String> tableColumnSituacao;
+
+	@FXML
+	private TableColumn<Agenda, Agenda> tableColumnEDIT;
+
+	@FXML
+	private TableColumn<Agenda, Agenda> tableColumnREMOVE;
 
 	@FXML
 	private Button btNew;
 
-	private ObservableList<Department> obsList;
+	private ObservableList<Agenda> obsList;
 
-	// Método chamado quando o botão "New" é acionado para adicionar um novo departamento.
+	// Método chamado quando o botão "New" é acionado para adicionar um novo
+	// agenda.
 	@FXML
 	public void onBtNewAction(ActionEvent event) {
 		Stage parentStage = Utils.currentStage(event);
-		Department obj = new Department();
-		createDialogForm(obj, "/gui/DepartmentForm.fxml", parentStage);
+		Agenda obj = new Agenda();
+		createDialogForm(obj, "/gui/AgendaForm.fxml", parentStage);
 	}
 
-	// Define o serviço de departamento.
-	public void setDepartmentService(DepartmentService service) {
+	// Define o serviço de agenda.
+	public void setAgendaService(AgendaService service) {
 		this.service = service;
 	}
 
@@ -77,39 +87,42 @@ public class DepartmentListController implements Initializable, DataChangeListen
 
 	// Inicializa os nós da tabela.
 	private void initializeNodes() {
-		tableColumnId.setCellValueFactory(new PropertyValueFactory<>("id"));
-		tableColumnName.setCellValueFactory(new PropertyValueFactory<>("name"));
+		tableColumnCodigo.setCellValueFactory(new PropertyValueFactory<>("cod_agenda_extracao"));
+		tableColumnTipo.setCellValueFactory(new PropertyValueFactory<>("tipo_doc"));
+		tableColumnInicio.setCellValueFactory(new PropertyValueFactory<>("par_inicio"));
+		tableColumnFim.setCellValueFactory(new PropertyValueFactory<>("par_fim"));
+		tableColumnSituacao.setCellValueFactory(new PropertyValueFactory<>("ind_situacao"));
 
 		Stage stage = (Stage) Main.getMainScene().getWindow();
-		tableViewDepartment.prefHeightProperty().bind(stage.heightProperty());
+		tableViewAgenda.prefHeightProperty().bind(stage.heightProperty());
 	}
 
-	// Atualiza a tabela de departamentos.
+	// Atualiza a tabela de agendas.
 	public void updateTableView() {
 		if (service == null) {
 			throw new IllegalStateException("Service was null");
 		}
-		List<Department> list = service.findAll();
+		List<Agenda> list = service.findAll();
 		obsList = FXCollections.observableArrayList(list);
-		tableViewDepartment.setItems(obsList);
+		tableViewAgenda.setItems(obsList);
 		initEditButtons();
 		initRemoveButtons();
 	}
 
-	// Cria um formulário de diálogo para adicionar ou editar um departamento.
-	private void createDialogForm(Department obj, String absoluteName, Stage parentStage) {
+	// Cria um formulário de diálogo para adicionar ou editar um agenda.
+	private void createDialogForm(Agenda obj, String absoluteName, Stage parentStage) {
 		try {
 			FXMLLoader loader = new FXMLLoader(getClass().getResource(absoluteName));
 			Pane pane = loader.load();
 
-			DepartmentFormController controller = loader.getController();
-			controller.setDepartment(obj);
-			controller.setDepartmentService(new DepartmentService());
+			AgendaFormController controller = loader.getController();
+			controller.setAgenda(obj);
+			controller.setAgendaService(new AgendaService());
 			controller.subscribeDataChangeListener(this);
 			controller.updateFormData();
 
 			Stage dialogStage = new Stage();
-			dialogStage.setTitle("Enter Department data");
+			dialogStage.setTitle("Enter Agenda data");
 			dialogStage.setScene(new Scene(pane));
 			dialogStage.setResizable(false);
 			dialogStage.initOwner(parentStage);
@@ -130,18 +143,18 @@ public class DepartmentListController implements Initializable, DataChangeListen
 	// Inicializa os botões de edição.
 	private void initEditButtons() {
 		tableColumnEDIT.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
-		tableColumnEDIT.setCellFactory(param -> new TableCell<Department, Department>() {
+		tableColumnEDIT.setCellFactory(param -> new TableCell<Agenda, Agenda>() {
 			private final Button button = new Button("edit");
 
 			@Override
-			protected void updateItem(Department obj, boolean empty) {
+			protected void updateItem(Agenda obj, boolean empty) {
 				super.updateItem(obj, empty);
 				if (obj == null) {
 					setGraphic(null);
 					return;
 				}
 				setGraphic(button);
-				button.setOnAction(event -> createDialogForm(obj, "/gui/DepartmentForm.fxml", Utils.currentStage(event)));
+				button.setOnAction(event -> createDialogForm(obj, "/gui/AgendaForm.fxml", Utils.currentStage(event)));
 			}
 		});
 	}
@@ -149,11 +162,11 @@ public class DepartmentListController implements Initializable, DataChangeListen
 	// Inicializa os botões de remoção.
 	private void initRemoveButtons() {
 		tableColumnREMOVE.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
-		tableColumnREMOVE.setCellFactory(param -> new TableCell<Department, Department>() {
+		tableColumnREMOVE.setCellFactory(param -> new TableCell<Agenda, Agenda>() {
 			private final Button button = new Button("remove");
 
 			@Override
-			protected void updateItem(Department obj, boolean empty) {
+			protected void updateItem(Agenda obj, boolean empty) {
 				super.updateItem(obj, empty);
 				if (obj == null) {
 					setGraphic(null);
@@ -165,8 +178,8 @@ public class DepartmentListController implements Initializable, DataChangeListen
 		});
 	}
 
-	// Remove um departamento após confirmação.
-	private void removeEntity(Department obj) {
+	// Remove um agenda após confirmação.
+	private void removeEntity(Agenda obj) {
 		Optional<ButtonType> result = Alerts.showConfirmation("Confirmation", "Are you sure to delete?");
 
 		if (result.get() == ButtonType.OK) {
@@ -181,4 +194,5 @@ public class DepartmentListController implements Initializable, DataChangeListen
 			}
 		}
 	}
+
 }

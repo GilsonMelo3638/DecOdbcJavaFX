@@ -38,15 +38,21 @@ public class DB {
 	}
 	
 	private static Properties loadProperties() {
-		try (FileInputStream fs = new FileInputStream("db.properties")) {
-			Properties props = new Properties();
-			props.load(fs);
-			return props;
-		}
-		catch (IOException e) {
-			throw new DbException(e.getMessage());
-		}
+	    try (FileInputStream fs = new FileInputStream("db.properties")) {
+	        Properties props = new Properties();
+	        props.load(fs);
+
+	        // Substitua as propriedades com base nas variáveis de ambiente
+	        props.setProperty("user", System.getenv("SPRING_DATASOURCE_USERNAME"));
+	        props.setProperty("password", System.getenv("SPRING_DATASOURCE_PASSWORD"));
+	        props.setProperty("dburl", System.getenv("SPRING_DATASOURCE_URL"));
+
+	        return props;
+	    } catch (IOException e) {
+	        throw new DbException(e.getMessage());
+	    }
 	}
+
 	
 	public static void closeStatement(Statement st) {
 		if (st != null) {

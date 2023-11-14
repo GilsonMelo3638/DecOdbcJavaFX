@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="68b5097f-dd13-484b-a5e3-40abb5bd2017" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.classpath" beforeDir="false" afterPath="$PROJECT_DIR$/.classpath" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.project" beforeDir="false" afterPath="$PROJECT_DIR$/.project" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.properties" beforeDir="false" afterPath="$PROJECT_DIR$/db.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/db/DbException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/db/DbException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/db/DbIntegrityException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/db/DbIntegrityException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/DepartmentForm.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/DepartmentFormController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/DepartmentList.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/DepartmentListController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/MainView.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/MainView.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/MainViewController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/MainViewController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/SellerForm.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/SellerFormController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/SellerList.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/SellerListController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/util/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/util/Utils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/model/dao/DaoFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/dao/DaoFactory.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/model/dao/DepartmentDao.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/model/dao/SellerDao.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/model/dao/impl/DepartmentDaoJDBC.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/model/dao/impl/SellerDaoJDBC.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/model/services/DepartmentService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/model/services/SellerService.java" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="2Y8EDxiXRdoTAxBFrtCwXH1EmgE" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "last_opened_file_path": "C:/Users/gilson.melo/IdeaProjects/2_DecOdbcJavaFX"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="68b5097f-dd13-484b-a5e3-40abb5bd2017" name="Changes" comment="" />
+      <created>1699898690596</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1699898690596</updated>
+    </task>
+    <servers />
+  </component>
+</project>

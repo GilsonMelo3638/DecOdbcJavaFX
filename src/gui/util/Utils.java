@@ -22,9 +22,9 @@ public class Utils {
     }
 
     // Tenta converter uma String em um Integer; retorna null em caso de falha.
-    public static Integer tryParseToInt(String str) {
+    public static Long tryParseToInt(String str) {
         try {
-            return Integer.parseInt(str);
+            return (long) Integer.parseInt(str);
         } catch (NumberFormatException e) {
             return null;
         }

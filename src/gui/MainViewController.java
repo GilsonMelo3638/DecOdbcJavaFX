@@ -16,38 +16,28 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
-import model.services.DepartmentService;
-import model.services.SellerService;
+import model.services.AgendaService;
 
 public class MainViewController implements Initializable {
 
 	@FXML
-	private MenuItem menuItemSeller;
-
-	@FXML
-	private MenuItem menuItemDepartment;
+	private MenuItem menuItemAgenda;
 
 	@FXML
 	private MenuItem menuItemAbout;
 
-	public void onMenuItemSellerAction() {
-		loadView("/gui/SellerList.fxml", (SellerListController controller) -> {
-			controller.setSellerService(new SellerService());
-			controller.updateTableView();
-		});
-	}
-
-	@FXML
-	public void onMenuItemDepartmentAction() {
-		loadView("/gui/DepartmentList.fxml", (DepartmentListController controller) -> {
-			controller.setDepartmentService(new DepartmentService());
-			controller.updateTableView();
-		});
-	}
-
 	@FXML
 	public void onMenuItemAboutAction() {
 		loadView("/gui/About.fxml", x -> {
+		});
+	}
+	
+	
+	@FXML
+	public void onMenuItemAgendaAction() {
+		loadView("/gui/AgendaList.fxml", (AgendaListController controller) -> {
+			controller.setAgendaService(new AgendaService());
+			controller.updateTableView();
 		});
 	}
 
