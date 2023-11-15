@@ -135,11 +135,23 @@ public class AgendaFormController implements Initializable {
         TipoDoc tipoDocumento = comboTipo.getValue();
         obj.setTipo_doc(tipoDocumento);
 
-        // Adicione o código para o novo enumerado
         if (comboSituacao.getValue() == null) {
             exception.addError("situacao", "Field can't be empty");
         } else {
             obj.setInd_situacao(comboSituacao.getValue());
+        }
+
+        // Adicionar lógica para tratar txtInicio e txtFim
+        String txtInicioValue = txtInicio.getText();
+        String txtFimValue = txtFim.getText();
+
+        // Adicione a lógica para validar e definir os valores em obj
+        if (isValid(txtInicioValue) && isValid(txtFimValue)) {
+            obj.setPar_inicio(txtInicioValue);
+            obj.setPar_fim(txtFimValue);
+        } else {
+            exception.addError("txtInicio", "Invalid value");
+            exception.addError("txtFim", "Invalid value");
         }
 
         if (exception.getErrors().size() > 0) {
@@ -147,6 +159,11 @@ public class AgendaFormController implements Initializable {
         }
 
         return obj;
+    }
+
+
+    private boolean isValid(String value) {
+        return value != null && !value.trim().isEmpty();
     }
 
     @FXML
@@ -157,13 +174,13 @@ public class AgendaFormController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         initializeNodes();
-                
+        
         // Adiciona um ouvinte de mudança de valor ao datePickerInicio
         datePickerInicio.valueProperty().addListener((observable, oldValue, newValue) -> {
             // Define a mesma data no datePickerFim quando a data do datePickerInicio for alterada
             datePickerFim.setValue(newValue);
         });
-
+                
         // Adicionar ouvintes para datePickerInicio e comboHoraInicio
         datePickerInicio.valueProperty().addListener((observable, oldValue, newValue) -> updateTxtDateTime(
                 comboHoraInicio, datePickerInicio, txtInicio, "%02d:00:00"
@@ -240,22 +257,31 @@ public class AgendaFormController implements Initializable {
         comboHoraFim.setItems(horas);
     }
 
-    // Método genérico para atualizar o campo de texto com base nos valores selecionados
     private void updateTxtDateTime(ComboBox<Integer> comboHora, DatePicker datePicker, TextField textField,
             String formatoHora) {
         LocalDate data = datePicker.getValue();
         Integer hora = comboHora.getValue();
 
         if (data != null && hora != null) {
-            LocalDateTime dataHora = LocalDateTime.of(data, LocalTime.of(hora, 0));
+            LocalDateTime dataHoraFim = LocalDateTime.of(data, LocalTime.of(hora, 0))
+                    .withMinute(59)
+                    .withSecond(59);
 
             // Formatar a data e hora como desejado (exemplo: "yyyy-MM-dd HH:mm:ss")
             String formato = "yyyy-MM-dd HH:mm:ss";
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(formato);
-            String resultadoFormatado = dataHora.format(formatter);
+            String resultadoFormatadoFim = dataHoraFim.format(formatter);
 
-            // Atualizar o campo de texto
-            textField.setText(resultadoFormatado);
+            // Verifica qual TextField foi passado como argumento e atualiza o valor correspondente
+            if (textField == txtInicio) {
+                // Se for o txtInicio, atualiza o valor conforme sua lógica original
+                String resultadoFormatadoInicio = LocalDateTime.of(data, LocalTime.of(hora, 0))
+                        .format(formatter);
+                txtInicio.setText(resultadoFormatadoInicio);
+            } else if (textField == txtFim) {
+                // Se for o txtFim, apenas atualiza a hora, mantendo minutos e segundos
+                txtFim.setText(resultadoFormatadoFim);
+            }
         } else {
             // Lógica de tratamento para valores nulos, se necessário
             textField.clear(); // Limpar o campo se algum dos valores for nulo
