@@ -46,8 +46,17 @@ public class AgendaFormController implements Initializable {
 
         // Adicione o código para preencher o comboSituacao com o valor da entidade
         comboSituacao.setValue(entity.getInd_situacao());
-    }
 
+        // Inicialize os campos txtInicio e txtFim com os valores da entidade
+        if (entity.getPar_inicio() != null) {
+            txtInicio.setText(entity.getPar_inicio());
+        }
+
+        if (entity.getPar_fim() != null) {
+            txtFim.setText(entity.getPar_fim());
+        }
+    }
+    
     private Agenda entity;
     private AgendaService service;
     private List<DataChangeListener> dataChangeListeners = new ArrayList<>();
@@ -100,27 +109,27 @@ public class AgendaFormController implements Initializable {
         dataChangeListeners.add(listener);
     }
 
-    @FXML
-    public void onBtSaveAction(ActionEvent event) {
-        if (entity == null) {
-            throw new IllegalStateException("Entity was null");
-        }
-        if (service == null) {
-            throw new IllegalStateException("Service was null");
-        }
-        try {
-            entity = getFormData();
-            service.saveOrUpdate(entity);
-            notifyDataChangeListeners();
-            Utils.currentStage(event).close();
-        } catch (ValidationException e) {
-            setErrorMessages(e.getErrors());
-        } catch (DbException e) {
-            Alerts.showAlert("Error saving object", null, e.getMessage(), AlertType.ERROR);
-        }
-    }
-
-    private void notifyDataChangeListeners() {
+	@FXML
+	public void onBtSaveAction(ActionEvent event) {
+		if (entity == null) {
+			throw new IllegalStateException("Entity was null");
+		}
+		if (service == null) {
+			throw new IllegalStateException("Service was null");
+		}
+		try {
+			entity = getFormData();
+			service.saveOrUpdate(entity);
+			notifyDataChangeListeners();
+			Utils.currentStage(event).close();
+		} catch (ValidationException e) {
+			setErrorMessages(e.getErrors());
+		} catch (DbException e) {
+			Alerts.showAlert("Error saving object", null, e.getMessage(), AlertType.ERROR);
+		}
+	}
+	
+	private void notifyDataChangeListeners() {
         for (DataChangeListener listener : dataChangeListeners) {
             listener.onDataChanged();
         }
