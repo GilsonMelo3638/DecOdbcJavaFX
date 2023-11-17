@@ -3,9 +3,11 @@ package gui;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
+import Validacoes.TipoDoc;
 import application.Main;
 import db.DbIntegrityException;
 import gui.listeners.DataChangeListener;
@@ -22,9 +24,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.Pane;
 import javafx.stage.Modality;
@@ -55,7 +59,19 @@ public class AgendaListController implements Initializable, DataChangeListener {
 	private TableColumn<Agenda, String> tableColumnSituacao;
 
 	@FXML
+	private TableColumn<Agenda, String> tableColumnArquivo;
+
+	@FXML
+	private TableColumn<Agenda, String> tableColumnQuantidade;
+	
+    @FXML
+    private ComboBox<TipoDoc> comboTipoDoc;
+
+	@FXML
 	private TableColumn<Agenda, Agenda> tableColumnEDIT;
+
+	@FXML
+	private TextField txtCodAgenda;
 
 	@FXML
 	private TableColumn<Agenda, Agenda> tableColumnREMOVE;
@@ -78,11 +94,12 @@ public class AgendaListController implements Initializable, DataChangeListener {
 	public void setAgendaService(AgendaService service) {
 		this.service = service;
 	}
-
+	
 	// Inicialização do controlador.
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		initializeNodes();
+		comboTipoDoc.getItems().setAll(TipoDoc.values());
 	}
 
 	// Inicializa os nós da tabela.
@@ -91,11 +108,14 @@ public class AgendaListController implements Initializable, DataChangeListener {
 		tableColumnTipo.setCellValueFactory(new PropertyValueFactory<>("tipo_doc"));
 		tableColumnInicio.setCellValueFactory(new PropertyValueFactory<>("par_inicio"));
 		tableColumnFim.setCellValueFactory(new PropertyValueFactory<>("par_fim"));
+		tableColumnArquivo.setCellValueFactory(new PropertyValueFactory<>("nome_arquivo"));
+		tableColumnQuantidade.setCellValueFactory(new PropertyValueFactory<>("quantidade"));
 		tableColumnSituacao.setCellValueFactory(new PropertyValueFactory<>("ind_situacao"));
 
 		Stage stage = (Stage) Main.getMainScene().getWindow();
 		tableViewAgenda.prefHeightProperty().bind(stage.heightProperty());
 	}
+
 
 	// Atualiza a tabela de agendas.
 	public void updateTableView() {
@@ -134,12 +154,63 @@ public class AgendaListController implements Initializable, DataChangeListener {
 		}
 	}
 
+	@FXML
+	public void handleSearch(ActionEvent event) {
+		try {
+			Long codAgenda = Long.valueOf(txtCodAgenda.getText());
+			Agenda agenda = service.findByCodAgenda(codAgenda);
+			// Limpa a lista de dados da tabela
+			tableViewAgenda.getItems().clear();
+
+			// Verifica se a agenda foi encontrada
+			if (agenda != null) {
+				// Adiciona o resultado da pesquisa à lista de itens da tabela
+				tableViewAgenda.getItems().add(agenda);
+			} else {
+				// A agenda não foi encontrada, você pode exibir uma mensagem ao usuário
+				System.out.println("Agenda não encontrada para o código: " + codAgenda);
+			}
+
+		} catch (NumberFormatException e) {
+			// Lida com a exceção se o texto não for um número
+			// (você pode exibir uma mensagem de erro, por exemplo)
+			e.printStackTrace(); // Substitua por uma lógica apropriada
+		}
+	}
+	
+	
+	
+	@FXML
+	public void PesquisarTipoDoc(ActionEvent event) {
+	    try {
+	        TipoDoc tipoDoc = comboTipoDoc.getValue(); // Obtenha o valor selecionado do ComboBox
+	        List<Agenda> agendas = service.findAllByTipoDoc(tipoDoc);
+
+	        // Limpa a lista de dados da tabela
+	        tableViewAgenda.getItems().clear();
+
+	        // Verifica se a lista de agendas não está vazia
+	        if (!agendas.isEmpty()) {
+	            // Adiciona os resultados da pesquisa à lista de itens da tabela
+	            tableViewAgenda.getItems().addAll(agendas);
+	        } else {
+	            // A lista de agendas está vazia, você pode exibir uma mensagem ao usuário
+	            System.out.println("Nenhuma agenda encontrada para o tipo de documento: " + tipoDoc);
+	        }
+
+	    } catch (Exception e) {
+	        // Lida com a exceção (você pode exibir uma mensagem de erro, por exemplo)
+	        e.printStackTrace(); // Substitua por uma lógica apropriada
+	    }
+	}
+
+
 	// Chamado quando os dados são alterados.
 	@Override
 	public void onDataChanged() {
 		updateTableView();
 	}
-
+	
 	// Inicializa os botões de edição.
 	private void initEditButtons() {
 		tableColumnEDIT.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
