@@ -35,8 +35,8 @@ public class AgendaService {
         dao.deleteByCodAgenda(obj.getCod_agenda_extracao());  // Remove uma agenda pelo ID.
     }
     
-    public List<Agenda> findAllByTipoDoc(TipoDoc tipoDoc) {
-        return dao.findAllByTipoDoc(tipoDoc);
+    public List<Agenda> findAllByTipoDoc(TipoDoc tipoDoc, int dias) {
+        return dao.findAllByTipoDoc(tipoDoc, dias);
     }
     
 }

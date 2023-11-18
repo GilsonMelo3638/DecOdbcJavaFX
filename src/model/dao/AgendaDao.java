@@ -20,7 +20,7 @@ public interface AgendaDao {
 
     List<Agenda> findByEvento(Evento evento);
     
-    List<Agenda> findAllByTipoDoc(TipoDoc tipoDoc);
+    List<Agenda> findAllByTipoDoc(TipoDoc tipoDoc, int dias);
 
     void commit(); // Adicione o método commit
 }

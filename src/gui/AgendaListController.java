@@ -72,6 +72,9 @@ public class AgendaListController implements Initializable, DataChangeListener {
 
 	@FXML
 	private TextField txtCodAgenda;
+	
+	@FXML
+	private TextField txtDias;
 
 	@FXML
 	private TableColumn<Agenda, Agenda> tableColumnREMOVE;
@@ -153,7 +156,7 @@ public class AgendaListController implements Initializable, DataChangeListener {
 			Alerts.showAlert("IO Exception", "Error loading view", e.getMessage(), AlertType.ERROR);
 		}
 	}
-
+	
 	@FXML
 	public void handleSearch(ActionEvent event) {
 		try {
@@ -177,15 +180,15 @@ public class AgendaListController implements Initializable, DataChangeListener {
 			e.printStackTrace(); // Substitua por uma lógica apropriada
 		}
 	}
-	
-	
+
+
 	
 	@FXML
 	public void PesquisarTipoDoc(ActionEvent event) {
 	    try {
 	        TipoDoc tipoDoc = comboTipoDoc.getValue(); // Obtenha o valor selecionado do ComboBox
-	        List<Agenda> agendas = service.findAllByTipoDoc(tipoDoc);
-
+	        int dias = Integer.parseInt(txtDias.getText()); // Obtenha o valor do campo txtDias como um inteiro
+	        List<Agenda> agendas = service.findAllByTipoDoc(tipoDoc, dias);
 	        // Limpa a lista de dados da tabela
 	        tableViewAgenda.getItems().clear();
 
@@ -203,6 +206,9 @@ public class AgendaListController implements Initializable, DataChangeListener {
 	        e.printStackTrace(); // Substitua por uma lógica apropriada
 	    }
 	}
+	
+	
+	
 
 
 	// Chamado quando os dados são alterados.

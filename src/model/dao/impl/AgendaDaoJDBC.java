@@ -164,7 +164,7 @@ public class AgendaDaoJDBC implements AgendaDao {
 
 
 	@Override
-	public List<Agenda> findAllByTipoDoc(TipoDoc tipoDoc) {
+	public List<Agenda> findAllByTipoDoc(TipoDoc tipoDoc, int dias) {
 	    PreparedStatement st = null;
 	    ResultSet rs = null;
 
@@ -173,7 +173,7 @@ public class AgendaDaoJDBC implements AgendaDao {
 	                "SELECT * FROM DEC_AGENDA_EXTRACAO WHERE TIPO_DOC = ? AND par_inicio >= ? ORDER BY COD_AGENDA_EXTRACAO");
 
 	        st.setString(1, tipoDoc.name());
-	        st.setDate(2, Date.valueOf(LocalDate.now().minusDays(10)));  // Subtrai 1 dia da data atual
+	        st.setDate(2, Date.valueOf(LocalDate.now().minusDays(dias)));  // Utiliza o valor do parâmetro 'dias'
 
 	        rs = st.executeQuery();
 

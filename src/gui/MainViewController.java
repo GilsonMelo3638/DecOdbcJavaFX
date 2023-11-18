@@ -19,6 +19,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import model.entities.Agenda;
 import model.services.AgendaService;
@@ -35,6 +36,9 @@ public class MainViewController implements Initializable {
 
     @FXML
     private ComboBox<TipoDoc> comboTipoDoc;
+    
+    @FXML
+    private TextField txtDias;
 
     @FXML
     public void onMenuItemAboutAction() {
@@ -44,14 +48,24 @@ public class MainViewController implements Initializable {
 
     @FXML
     public void comboTipoDocChanged() {
-        // Certifique-se de que o serviço não seja nulo antes de usá-lo
-        Objects.requireNonNull(service, "O serviço não está inicializado.");
+        try {
+            // Certifique-se de que o serviço não seja nulo antes de usá-lo
+            Objects.requireNonNull(service, "O serviço não está inicializado.");
 
-        TipoDoc selectedTipoDoc = comboTipoDoc.getValue(); // ou outra forma de obter o valor selecionado
+            TipoDoc selectedTipoDoc = comboTipoDoc.getValue(); // ou outra forma de obter o valor selecionado
+            int dias = Integer.parseInt(txtDias.getText()); // Obtenha o valor do campo txtDias como um inteiro
 
-        List<Agenda> agendas = service.findAllByTipoDoc(selectedTipoDoc);
-        // Atualize a exibição com as novas agendas
+            List<Agenda> agendas = service.findAllByTipoDoc(selectedTipoDoc, dias);
+            // Atualize a exibição com as novas agendas
+        } catch (NumberFormatException e) {
+            // Lida com exceção se o valor em txtDias não for um número inteiro válido
+            Alerts.showAlert("Error", null, "Please enter a valid number for days.", AlertType.ERROR);
+        } catch (Exception e) {
+            // Lida com outras exceções
+            e.printStackTrace(); // Substitua por uma lógica apropriada
+        }
     }
+
 
     @FXML
     public void onMenuItemAgendaAction() {
