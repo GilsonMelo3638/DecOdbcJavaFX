@@ -3,10 +3,10 @@ package gui;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
+import Validacoes.SituacaoProcessamento;
 import Validacoes.TipoDoc;
 import application.Main;
 import db.DbIntegrityException;
@@ -25,6 +25,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -75,7 +76,10 @@ public class AgendaListController implements Initializable, DataChangeListener {
 	
 	@FXML
 	private TextField txtDias;
-
+	
+	@FXML
+    private Label txtTotalArquivo;
+	
 	@FXML
 	private TableColumn<Agenda, Agenda> tableColumnREMOVE;
 
@@ -84,26 +88,39 @@ public class AgendaListController implements Initializable, DataChangeListener {
 
 	private ObservableList<Agenda> obsList;
 
-	// Método chamado quando o botão "New" é acionado para adicionar um novo
-	// agenda.
-	@FXML
-	public void onBtNewAction(ActionEvent event) {
-		Stage parentStage = Utils.currentStage(event);
-		Agenda obj = new Agenda();
-		createDialogForm(obj, "/gui/AgendaForm.fxml", parentStage);
-	}
+    // Método chamado quando o botão "New" é acionado para adicionar um novo
+    // agenda.
+    @FXML
+    public void onBtNewAction(ActionEvent event) {
+        Stage parentStage = Utils.currentStage(event);
+        Agenda obj = new Agenda();
+        createDialogForm(obj, "/gui/AgendaForm.fxml", parentStage);
+        // Após adicionar um novo item, atualiza o valor do Label
+        calculateAndSetTotalLines();
+    }
+	
 
 	// Define o serviço de agenda.
 	public void setAgendaService(AgendaService service) {
 		this.service = service;
 	}
 	
-	// Inicialização do controlador.
-	@Override
-	public void initialize(URL url, ResourceBundle rb) {
-		initializeNodes();
-		comboTipoDoc.getItems().setAll(TipoDoc.values());
-	}
+    // Inicialização do controlador.
+    @Override
+    public void initialize(URL url, ResourceBundle rb) {
+        initializeNodes();
+        txtDias.setText("10");
+        comboTipoDoc.getItems().setAll(TipoDoc.values());
+        // Calcula o total de linhas e define no txtTotalArquivo
+        calculateAndSetTotalLines();
+    }
+
+    private void calculateAndSetTotalLines() {
+        if (obsList != null) {
+            int totalLines = obsList.size();
+            txtTotalArquivo.setText(String.valueOf(totalLines));
+        }
+    }
 
 	// Inicializa os nós da tabela.
 	private void initializeNodes() {
@@ -120,17 +137,19 @@ public class AgendaListController implements Initializable, DataChangeListener {
 	}
 
 
-	// Atualiza a tabela de agendas.
-	public void updateTableView() {
-		if (service == null) {
-			throw new IllegalStateException("Service was null");
-		}
-		List<Agenda> list = service.findAll();
-		obsList = FXCollections.observableArrayList(list);
-		tableViewAgenda.setItems(obsList);
-		initEditButtons();
-		initRemoveButtons();
-	}
+    // Atualiza a tabela de agendas.
+    public void updateTableView() {
+        if (service == null) {
+            throw new IllegalStateException("Service was null");
+        }
+        List<Agenda> list = service.findAll();
+        obsList = FXCollections.observableArrayList(list);
+        tableViewAgenda.setItems(obsList);
+        initEditButtons();
+        initRemoveButtons();
+        // Adicione esta linha para calcular e definir o total de linhas
+        calculateAndSetTotalLines();
+    }
 
 	// Cria um formulário de diálogo para adicionar ou editar um agenda.
 	private void createDialogForm(Agenda obj, String absoluteName, Stage parentStage) {
@@ -182,7 +201,6 @@ public class AgendaListController implements Initializable, DataChangeListener {
 	}
 
 
-	
 	@FXML
 	public void PesquisarTipoDoc(ActionEvent event) {
 	    try {
@@ -201,40 +219,47 @@ public class AgendaListController implements Initializable, DataChangeListener {
 	            System.out.println("Nenhuma agenda encontrada para o tipo de documento: " + tipoDoc);
 	        }
 
+	        // Adicione esta linha para calcular e definir o total de linhas
+	        calculateAndSetTotalLines();
+
 	    } catch (Exception e) {
 	        // Lida com a exceção (você pode exibir uma mensagem de erro, por exemplo)
 	        e.printStackTrace(); // Substitua por uma lógica apropriada
-	    }
+	    } 
 	}
 	
-	
-	
-
-
 	// Chamado quando os dados são alterados.
 	@Override
 	public void onDataChanged() {
 		updateTableView();
 	}
 	
+
 	// Inicializa os botões de edição.
 	private void initEditButtons() {
-		tableColumnEDIT.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
-		tableColumnEDIT.setCellFactory(param -> new TableCell<Agenda, Agenda>() {
-			private final Button button = new Button("edit");
+	    tableColumnEDIT.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
 
-			@Override
-			protected void updateItem(Agenda obj, boolean empty) {
-				super.updateItem(obj, empty);
-				if (obj == null) {
-					setGraphic(null);
-					return;
-				}
-				setGraphic(button);
-				button.setOnAction(event -> createDialogForm(obj, "/gui/AgendaForm.fxml", Utils.currentStage(event)));
-			}
-		});
+	    tableColumnEDIT.setCellFactory(param -> new TableCell<Agenda, Agenda>() {
+	        private final Button button = new Button("edit");
+
+	        @Override
+	        protected void updateItem(Agenda obj, boolean empty) {
+	            super.updateItem(obj, empty);
+	            if (obj == null || obj.getInd_situacao() != SituacaoProcessamento.AGENDADO) {
+	                setGraphic(null);
+	                return;
+	            }
+	            setGraphic(button);
+	            button.setOnAction(event -> createDialogForm(obj, "/gui/AgendaForm.fxml", Utils.currentStage(event)));
+	        }
+	    });
+
+	    // Defina a largura da coluna aqui ou em outro lugar do seu código
+	    tableColumnEDIT.setPrefWidth(60);
 	}
+
+
+
 
 	// Inicializa os botões de remoção.
 	private void initRemoveButtons() {
@@ -245,7 +270,7 @@ public class AgendaListController implements Initializable, DataChangeListener {
 			@Override
 			protected void updateItem(Agenda obj, boolean empty) {
 				super.updateItem(obj, empty);
-				if (obj == null) {
+				if (obj == null || obj.getInd_situacao() != SituacaoProcessamento.AGENDADO) {
 					setGraphic(null);
 					return;
 				}
@@ -253,6 +278,8 @@ public class AgendaListController implements Initializable, DataChangeListener {
 				button.setOnAction(event -> removeEntity(obj));
 			}
 		});
+	    // Defina a largura da coluna aqui ou em outro lugar do seu código
+		tableColumnREMOVE.setPrefWidth(120);
 	}
 
 	// Remove um agenda após confirmação.

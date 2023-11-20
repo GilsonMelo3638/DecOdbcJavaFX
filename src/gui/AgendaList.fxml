@@ -38,12 +38,15 @@
 		<Label text="Código da Agenda:" />
 		<TextField fx:id="txtCodAgenda" />
 		<Button text="Pesquisar" onAction="#handleSearch" />
+		<Label text="Dias:" />
+		<TextField fx:id="txtDias" />
 		<ComboBox fx:id="comboTipoDoc" promptText="Tipo de Documento"
 			onAction="#PesquisarTipoDoc">
 			<!-- Os itens do ComboBox serão preenchidos dinamicamente no código Java -->
 		</ComboBox>
-		<Label text="Dias:" />
-		<TextField fx:id="txtDias" />
+		<Label text="Total de Arquivos:" />
+		<Label fx:id="txtTotalArquivo" />
+
 	</HBox>
 
 	<TableView fx:id="tableViewAgenda" prefHeight="300.0"

@@ -8,5 +8,6 @@ public enum SituacaoProcessamento {
     FINALIZADO,
     EM_ANDAMENTO,
     INTERROMPE,
+    INICIADO_PRIORIDADE,
     ERRO;
 }
