@@ -24,8 +24,10 @@ import javafx.scene.layout.VBox;
 import model.entities.Agenda;
 import model.services.AgendaService;
 
+// Controlador principal da aplicação
 public class MainViewController implements Initializable {
 
+    // Serviço para manipulação de agendas
     private final AgendaService service = new AgendaService();
 
     @FXML
@@ -36,27 +38,35 @@ public class MainViewController implements Initializable {
 
     @FXML
     private ComboBox<TipoDoc> comboTipoDoc;
-    
+
     @FXML
     private TextField txtDias;
 
+    // Método chamado quando a opção "About" no menu é selecionada
     @FXML
     public void onMenuItemAboutAction() {
+        // Carrega a view sobre informações
         loadView("/gui/About.fxml", x -> {
+            // Nenhuma ação de inicialização necessária
         });
     }
 
+    // Método chamado quando o valor do ComboBox de tipo de documento é alterado
     @FXML
     public void comboTipoDocChanged() {
         try {
-            // Certifique-se de que o serviço não seja nulo antes de usá-lo
+            // Certifica-se de que o serviço não seja nulo antes de usá-lo
             Objects.requireNonNull(service, "O serviço não está inicializado.");
 
-            TipoDoc selectedTipoDoc = comboTipoDoc.getValue(); // ou outra forma de obter o valor selecionado
-            int dias = Integer.parseInt(txtDias.getText()); // Obtenha o valor do campo txtDias como um inteiro
+            // Obtém o tipo de documento selecionado no ComboBox
+            TipoDoc selectedTipoDoc = comboTipoDoc.getValue();
+            // Obtém o número de dias do campo txtDias como um inteiro
+            int dias = Integer.parseInt(txtDias.getText());
 
+            // Encontra as agendas pelo tipo de documento e número de dias
             List<Agenda> agendas = service.findAllByTipoDoc(selectedTipoDoc, dias);
-            // Atualize a exibição com as novas agendas
+            // Atualiza a exibição com as novas agendas
+
         } catch (NumberFormatException e) {
             // Lida com exceção se o valor em txtDias não for um número inteiro válido
             Alerts.showAlert("Error", null, "Please enter a valid number for days.", AlertType.ERROR);
@@ -66,35 +76,48 @@ public class MainViewController implements Initializable {
         }
     }
 
-
+    // Método chamado quando a opção "Agenda" no menu é selecionada
     @FXML
     public void onMenuItemAgendaAction() {
+        // Carrega a view da lista de agendas
         loadView("/gui/AgendaList.fxml", (AgendaListController controller) -> {
+            // Seta o serviço de agenda e atualiza a tabela
             controller.setAgendaService(service);
             controller.updateTableView();
         });
     }
 
+    // Método de inicialização do controlador
     @Override
     public void initialize(URL uri, ResourceBundle rb) {
+        // Nenhuma inicialização necessária por enquanto
     }
 
+    // Método para carregar uma nova view
     private synchronized <T> void loadView(String absoluteName, Consumer<T> initializingAction) {
         try {
+            // Carrega o arquivo FXML da nova view
             FXMLLoader loader = new FXMLLoader(getClass().getResource(absoluteName));
             VBox newVBox = loader.load();
 
+            // Obtém a cena principal e a caixa de layout principal
             Scene mainScene = Main.getMainScene();
             VBox mainVBox = (VBox) ((ScrollPane) mainScene.getRoot()).getContent();
 
+            // Obtém o menu principal
             Node mainMenu = mainVBox.getChildren().get(0);
+
+            // Limpa a caixa de layout principal e adiciona o menu principal e a nova view
             mainVBox.getChildren().clear();
             mainVBox.getChildren().add(mainMenu);
             mainVBox.getChildren().addAll(newVBox.getChildren());
 
+            // Obtém o controlador da nova view
             T controller = loader.getController();
+            // Executa a ação de inicialização no controlador
             initializingAction.accept(controller);
         } catch (IOException e) {
+            // Exibe um alerta em caso de erro ao carregar a view
             Alerts.showAlert("IO Exception", "Error loading view", e.getMessage(), AlertType.ERROR);
         }
     }

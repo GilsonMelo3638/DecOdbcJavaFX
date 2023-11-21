@@ -28,14 +28,17 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleGroup;
 import javafx.util.StringConverter;
 import model.entities.Agenda;
 import model.exceptions.ValidationException;
 import model.services.AgendaService;
 
 public class AgendaFormController implements Initializable {
-	
+
+    // Atualiza os dados do formulário com a entidade atual.
     public void updateFormData() {
         if (entity == null) {
             throw new IllegalStateException("Entity was null");
@@ -56,9 +59,14 @@ public class AgendaFormController implements Initializable {
             txtFim.setText(entity.getPar_fim());
         }
     }
-    
+
+    // Entidade atual sendo manipulada pelo formulário.
     private Agenda entity;
+
+    // Serviço que fornece operações relacionadas à entidade Agenda.
     private AgendaService service;
+
+    // Lista de ouvintes para eventos de mudança de dados.
     private List<DataChangeListener> dataChangeListeners = new ArrayList<>();
 
     @FXML
@@ -87,6 +95,15 @@ public class AgendaFormController implements Initializable {
 
     @FXML
     private ComboBox<SituacaoProcessamento> comboSituacao;
+    
+    @FXML
+    private RadioButton radioAutomatico;
+
+    @FXML
+    private RadioButton radioManual;
+
+    @FXML
+    private ToggleGroup grupoRadio;
 
     @FXML
     private Label labelErrorTipo;
@@ -97,44 +114,50 @@ public class AgendaFormController implements Initializable {
     @FXML
     private Button btCancel;
 
+    // Define a entidade a ser manipulada pelo formulário.
     public void setAgenda(Agenda entity) {
         this.entity = entity;
     }
 
+    // Define o serviço para operações relacionadas à entidade Agenda.
     public void setAgendaService(AgendaService service) {
         this.service = service;
     }
 
+    // Inscreve um ouvinte para eventos de mudança de dados.
     public void subscribeDataChangeListener(DataChangeListener listener) {
         dataChangeListeners.add(listener);
     }
 
-	@FXML
-	public void onBtSaveAction(ActionEvent event) {
-		if (entity == null) {
-			throw new IllegalStateException("Entity was null");
-		}
-		if (service == null) {
-			throw new IllegalStateException("Service was null");
-		}
-		try {
-			entity = getFormData();
-			service.saveOrUpdate(entity);
-			notifyDataChangeListeners();
-			Utils.currentStage(event).close();
-		} catch (ValidationException e) {
-			setErrorMessages(e.getErrors());
-		} catch (DbException e) {
-			Alerts.showAlert("Error saving object", null, e.getMessage(), AlertType.ERROR);
-		}
-	}
-	
-	private void notifyDataChangeListeners() {
+    // Ação do botão "Salvar" no formulário.
+    @FXML
+    public void onBtSaveAction(ActionEvent event) {
+        if (entity == null) {
+            throw new IllegalStateException("Entity was null");
+        }
+        if (service == null) {
+            throw new IllegalStateException("Service was null");
+        }
+        try {
+            entity = getFormData();
+            service.saveOrUpdate(entity);
+            notifyDataChangeListeners();
+            Utils.currentStage(event).close();
+        } catch (ValidationException e) {
+            setErrorMessages(e.getErrors());
+        } catch (DbException e) {
+            Alerts.showAlert("Error saving object", null, e.getMessage(), AlertType.ERROR);
+        }
+    }
+
+    // Notifica os ouvintes sobre a mudança de dados.
+    private void notifyDataChangeListeners() {
         for (DataChangeListener listener : dataChangeListeners) {
             listener.onDataChanged();
         }
     }
 
+    // Obtém os dados do formulário e retorna uma instância de Agenda.
     private Agenda getFormData() {
         Agenda obj = new Agenda();
         ValidationException exception = new ValidationException("Validation error");
@@ -170,26 +193,28 @@ public class AgendaFormController implements Initializable {
         return obj;
     }
 
-
+    // Verifica se um valor é válido (não nulo ou vazio).
     private boolean isValid(String value) {
         return value != null && !value.trim().isEmpty();
     }
 
+    // Ação do botão "Cancelar" no formulário.
     @FXML
     public void onBtCancelAction(ActionEvent event) {
         Utils.currentStage(event).close();
     }
 
+    // Inicializa o controlador.
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         initializeNodes();
-        
+
         // Adiciona um ouvinte de mudança de valor ao datePickerInicio
         datePickerInicio.valueProperty().addListener((observable, oldValue, newValue) -> {
             // Define a mesma data no datePickerFim quando a data do datePickerInicio for alterada
             datePickerFim.setValue(newValue);
         });
-                
+
         // Adicionar ouvintes para datePickerInicio e comboHoraInicio
         datePickerInicio.valueProperty().addListener((observable, oldValue, newValue) -> updateTxtDateTime(
                 comboHoraInicio, datePickerInicio, txtInicio, "%02d:00:00"
@@ -197,12 +222,10 @@ public class AgendaFormController implements Initializable {
         comboHoraInicio.valueProperty().addListener((observable, oldValue, newValue) -> updateTxtDateTime(
                 comboHoraInicio, datePickerInicio, txtInicio, "%02d:00:00"
         ));
-        
-        
+
         // Inicialize o ComboBox com os valores do Enum TipoDoc
         ObservableList<TipoDoc> tipoDocList = FXCollections.observableArrayList(TipoDoc.values());
         comboTipo.setItems(tipoDocList);
-
 
         // Inicialize o ComboBox com os valores do Enum SituacaoProcessamento
         ObservableList<SituacaoProcessamento> situacaoList = FXCollections.observableArrayList(SituacaoProcessamento.values());
@@ -215,8 +238,7 @@ public class AgendaFormController implements Initializable {
                 comboSituacao.getSelectionModel().select(valorPadrao);
             }
         });
-        
-        
+
         // Inicialize os ComboBoxes de hora
         ObservableList<Integer> horas = FXCollections.observableArrayList();
 
@@ -237,8 +259,118 @@ public class AgendaFormController implements Initializable {
         comboHoraFim.valueProperty().addListener((observable, oldValue, newValue) -> updateTxtDateTime(
                 comboHoraFim, datePickerFim, txtFim, "%02d:59:59"
         ));
+        
+     // Adiciona um ouvinte de mudança no comboTipo
+        comboTipo.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                updateComboHoraFimBasedOnTipoDoc(newValue);
+            }
+        });
+        
+        // Adicione um ouvinte para o RadioButton radioAutomatico
+        radioAutomatico.selectedProperty().addListener((obs, oldValue, newValue) -> {
+            if (newValue) {
+                // Se o radioAutomatico estiver selecionado, habilite o datePickerInicio
+                datePickerInicio.setDisable(false);
+
+                // Defina o valor de comboSituacao para AGENDADO
+                if (comboSituacao.getItems().contains(SituacaoProcessamento.AGENDADO)) {
+                    comboSituacao.getSelectionModel().select(SituacaoProcessamento.AGENDADO);
+                }
+            } else {
+                // Se o radioAutomatico não estiver selecionado, desabilite o datePickerInicio
+                datePickerInicio.setDisable(true);
+                // Lógica adicional, se necessário
+            }
+        });
+
+        // Configura os RadioButtons para fazer parte do mesmo grupo
+        grupoRadio = new ToggleGroup();
+        radioAutomatico.setToggleGroup(grupoRadio);
+        radioManual.setToggleGroup(grupoRadio);
+
+        // Define o RadioButton inicial selecionado
+        radioAutomatico.setSelected(true);
+        
+        // Adiciona um ouvinte para o comboTipo
+        comboTipo.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                // Verifica se o radioAutomatico está selecionado
+                if (radioAutomatico.isSelected()) {
+                    // Desabilita a edição dos campos
+                    txtInicio.setDisable(true);
+                    txtFim.setDisable(true);
+                    comboHoraInicio.setDisable(false);
+                    comboHoraFim.setDisable(true);
+                    datePickerFim.setDisable(true);
+                    
+                    // Limpa o valor de txtInicio
+                    datePickerInicio.setValue(null);
+
+                    // Set comboSituacao como AGENDADO
+                    if (comboSituacao.getItems().contains(SituacaoProcessamento.AGENDADO)) {
+                        comboSituacao.getSelectionModel().select(SituacaoProcessamento.AGENDADO);
+                    }
+                }
+            }
+        });
+        
+        // Adiciona um ouvinte para o comboHoraInicio
+        comboHoraInicio.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null && radioAutomatico.isSelected() && "hora".equals(comboTipo.getValue().getFrequencia())) {
+                // Se frequencia for "hora", ajusta o valor de comboHoraFim para o mesmo valor
+                comboHoraFim.setValue(newValue);
+            }
+        });
+        
+        // Adiciona um ouvinte para o comboTipo
+        comboTipo.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                // Verifica se o radioAutomatico está selecionado
+                if (radioAutomatico.isSelected()) {
+                    // Desabilita a edição dos campos
+                    txtInicio.setDisable(true);
+                    txtFim.setDisable(true);
+                    comboHoraInicio.setDisable(false);
+                    comboHoraFim.setDisable(true);
+
+                    // Set comboSituacao como AGENDADO
+                    if (comboSituacao.getItems().contains(SituacaoProcessamento.AGENDADO)) {
+                        comboSituacao.getSelectionModel().select(SituacaoProcessamento.AGENDADO);
+                    }
+                } else {
+                    // Se radioManual está selecionado, habilita a edição dos campos
+                    txtInicio.setDisable(true);
+                    txtFim.setDisable(true);
+                    datePickerInicio.setDisable(false);
+                    datePickerFim.setDisable(false);
+                    comboHoraInicio.setDisable(false);
+                    comboHoraFim.setDisable(false);
+
+                    // Lógica para configurar comboSituacao conforme necessário para o radioManual
+                    // (você pode ajustar conforme necessário)
+                    if (comboSituacao.getItems().contains(SituacaoProcessamento.AGENDADO)) {
+                        comboSituacao.getSelectionModel().select(SituacaoProcessamento.AGENDADO);
+                    }
+                }
+            }
+        });
+
+        
+    }
+    
+    private void updateComboHoraFimBasedOnTipoDoc(TipoDoc tipoDoc) {
+        if ("diario".equals(tipoDoc.getFrequencia())) {
+            // Se for diário, configure o comboHoraFim para 23:59:59
+            comboHoraFim.setValue(23);
+        } else if ("hora".equals(tipoDoc.getFrequencia())) {
+            // Se for por hora, configure o comboHoraFim para a mesma hora do comboHoraInicio
+            comboHoraFim.setValue(comboHoraInicio.getValue());
+        }
     }
 
+
+    // Inicializa os elementos gráficos.
     private void initializeNodes() {
         Constraints.setTextFieldInteger(txtCodigo);
 
@@ -266,6 +398,7 @@ public class AgendaFormController implements Initializable {
         comboHoraFim.setItems(horas);
     }
 
+    // Atualiza o valor da data e hora em um TextField.
     private void updateTxtDateTime(ComboBox<Integer> comboHora, DatePicker datePicker, TextField textField,
             String formatoHora) {
         LocalDate data = datePicker.getValue();
@@ -297,7 +430,7 @@ public class AgendaFormController implements Initializable {
         }
     }
 
-    // Método genérico para configurar a ComboBox de hora
+    // Configura a ComboBox de hora com um formato específico.
     private void setupHoraComboBox(ComboBox<Integer> comboBox, String formato) {
         ObservableList<Integer> horas = FXCollections.observableArrayList();
 
@@ -320,6 +453,7 @@ public class AgendaFormController implements Initializable {
         });
     }
 
+    // Exibe mensagens de erro no formulário.
     private void setErrorMessages(Map<String, String> errors) {
         Set<String> fields = errors.keySet();
 

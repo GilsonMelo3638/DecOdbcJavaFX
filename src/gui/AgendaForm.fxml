@@ -4,6 +4,7 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
@@ -12,11 +13,11 @@
 
 <AnchorPane prefHeight="300.0" prefWidth="829.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.AgendaFormController">
 	<children>
-		<GridPane layoutX="33.0" layoutY="25.0" prefHeight="197.0" prefWidth="570.0" AnchorPane.bottomAnchor="95.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="339.0" AnchorPane.topAnchor="25.0">
+		<GridPane layoutX="20.0" layoutY="34.0" prefHeight="197.0" prefWidth="570.0" AnchorPane.bottomAnchor="80.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="339.0" AnchorPane.topAnchor="60.0">
 			<columnConstraints>
 				<ColumnConstraints hgrow="SOMETIMES" maxWidth="161.0" minWidth="10.0" prefWidth="63.0" />
 				<ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="10.0" prefWidth="120.0" />
-            <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="10.0" prefWidth="100.0" />
+				<ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="10.0" prefWidth="100.0" />
 				<ColumnConstraints hgrow="SOMETIMES" maxWidth="100.0" minWidth="10.0" prefWidth="80.0" />
 			</columnConstraints>
 			<rowConstraints>
@@ -47,5 +48,7 @@
 		</GridPane>
 		<Button fx:id="btSave" layoutX="101.0" layoutY="261.0" mnemonicParsing="false" onAction="#onBtSaveAction" text="Save" />
 		<Button fx:id="btCancel" layoutX="214.0" layoutY="262.0" mnemonicParsing="false" onAction="#onBtCancelAction" text="Cancel" />
+		<RadioButton fx:id="radioAutomatico" layoutX="124.0" layoutY="21.0" mnemonicParsing="false" text="Automático" selected="true"/>
+      <RadioButton fx:id="radioManual" layoutX="286.0" layoutY="20.0" mnemonicParsing="false" text="Manual" />
 	</children>
 </AnchorPane>

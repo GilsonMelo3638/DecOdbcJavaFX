@@ -37,266 +37,304 @@ import javafx.stage.Stage;
 import model.entities.Agenda;
 import model.services.AgendaService;
 
+// Controlador para a tela de listagem de agendas
 public class AgendaListController implements Initializable, DataChangeListener {
 
-	private AgendaService service;
+    private AgendaService service;
 
-	@FXML
-	private TableView<Agenda> tableViewAgenda;
+    @FXML
+    private TableView<Agenda> tableViewAgenda;
 
-	@FXML
-	private TableColumn<Agenda, Long> tableColumnCodigo;
+    @FXML
+    private TableColumn<Agenda, Long> tableColumnCodigo;
 
-	@FXML
-	private TableColumn<Agenda, String> tableColumnTipo;
+    @FXML
+    private TableColumn<Agenda, String> tableColumnTipo;
 
-	@FXML
-	private TableColumn<Agenda, String> tableColumnInicio;
+    @FXML
+    private TableColumn<Agenda, String> tableColumnInicio;
 
-	@FXML
-	private TableColumn<Agenda, String> tableColumnFim;
+    @FXML
+    private TableColumn<Agenda, String> tableColumnFim;
 
-	@FXML
-	private TableColumn<Agenda, String> tableColumnSituacao;
+    @FXML
+    private TableColumn<Agenda, String> tableColumnSituacao;
 
-	@FXML
-	private TableColumn<Agenda, String> tableColumnArquivo;
+    @FXML
+    private TableColumn<Agenda, String> tableColumnArquivo;
 
-	@FXML
-	private TableColumn<Agenda, String> tableColumnQuantidade;
-	
+    @FXML
+    private TableColumn<Agenda, String> tableColumnQuantidade;
+
     @FXML
     private ComboBox<TipoDoc> comboTipoDoc;
 
-	@FXML
-	private TableColumn<Agenda, Agenda> tableColumnEDIT;
+    @FXML
+    private TableColumn<Agenda, Agenda> tableColumnEDIT;
 
-	@FXML
-	private TextField txtCodAgenda;
-	
-	@FXML
-	private TextField txtDias;
-	
-	@FXML
+    @FXML
+    private TextField txtCodAgenda;
+
+    @FXML
+    private TextField txtDias;
+
+    @FXML
     private Label txtTotalArquivo;
-	
-	@FXML
-	private TableColumn<Agenda, Agenda> tableColumnREMOVE;
 
-	@FXML
-	private Button btNew;
+    @FXML
+    private TableColumn<Agenda, Agenda> tableColumnREMOVE;
 
-	private ObservableList<Agenda> obsList;
+    @FXML
+    private Button btNew;
+
+    private ObservableList<Agenda> obsList;
 
     // Método chamado quando o botão "New" é acionado para adicionar um novo
     // agenda.
     @FXML
     public void onBtNewAction(ActionEvent event) {
+        // Obtém a referência à janela pai
         Stage parentStage = Utils.currentStage(event);
+        // Cria uma nova agenda
         Agenda obj = new Agenda();
+        // Chama o método para exibir o formulário de diálogo
         createDialogForm(obj, "/gui/AgendaForm.fxml", parentStage);
         // Após adicionar um novo item, atualiza o valor do Label
         calculateAndSetTotalLines();
     }
-	
 
-	// Define o serviço de agenda.
-	public void setAgendaService(AgendaService service) {
-		this.service = service;
-	}
-	
+    // Define o serviço de agenda.
+    public void setAgendaService(AgendaService service) {
+        this.service = service;
+    }
+
     // Inicialização do controlador.
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        // Inicializa os componentes da tela
         initializeNodes();
+        // Define o valor padrão para o campo de dias
         txtDias.setText("10");
+        // Preenche o ComboBox com os valores de TipoDoc
         comboTipoDoc.getItems().setAll(TipoDoc.values());
         // Calcula o total de linhas e define no txtTotalArquivo
         calculateAndSetTotalLines();
     }
 
+    // Método para calcular e definir o total de linhas no txtTotalArquivo
     private void calculateAndSetTotalLines() {
         if (obsList != null) {
             int totalLines = obsList.size();
+            // Define o total de linhas no Label
             txtTotalArquivo.setText(String.valueOf(totalLines));
         }
     }
 
-	// Inicializa os nós da tabela.
-	private void initializeNodes() {
-		tableColumnCodigo.setCellValueFactory(new PropertyValueFactory<>("cod_agenda_extracao"));
-		tableColumnTipo.setCellValueFactory(new PropertyValueFactory<>("tipo_doc"));
-		tableColumnInicio.setCellValueFactory(new PropertyValueFactory<>("par_inicio"));
-		tableColumnFim.setCellValueFactory(new PropertyValueFactory<>("par_fim"));
-		tableColumnArquivo.setCellValueFactory(new PropertyValueFactory<>("nome_arquivo"));
-		tableColumnQuantidade.setCellValueFactory(new PropertyValueFactory<>("quantidade"));
-		tableColumnSituacao.setCellValueFactory(new PropertyValueFactory<>("ind_situacao"));
+    // Inicializa os nós da tabela.
+    private void initializeNodes() {
+        // Associa as colunas da tabela aos atributos da classe Agenda
+        tableColumnCodigo.setCellValueFactory(new PropertyValueFactory<>("cod_agenda_extracao"));
+        tableColumnTipo.setCellValueFactory(new PropertyValueFactory<>("tipo_doc"));
+        tableColumnInicio.setCellValueFactory(new PropertyValueFactory<>("par_inicio"));
+        tableColumnFim.setCellValueFactory(new PropertyValueFactory<>("par_fim"));
+        tableColumnArquivo.setCellValueFactory(new PropertyValueFactory<>("nome_arquivo"));
+        tableColumnQuantidade.setCellValueFactory(new PropertyValueFactory<>("quantidade"));
+        tableColumnSituacao.setCellValueFactory(new PropertyValueFactory<>("ind_situacao"));
 
-		Stage stage = (Stage) Main.getMainScene().getWindow();
-		tableViewAgenda.prefHeightProperty().bind(stage.heightProperty());
-	}
-
+        // Obtém a referência à janela principal e ajusta a altura da tabela
+        Stage stage = (Stage) Main.getMainScene().getWindow();
+        tableViewAgenda.prefHeightProperty().bind(stage.heightProperty());
+    }
 
     // Atualiza a tabela de agendas.
     public void updateTableView() {
+        // Verifica se o serviço está inicializado
         if (service == null) {
             throw new IllegalStateException("Service was null");
         }
+        // Obtém a lista de agendas do serviço
         List<Agenda> list = service.findAll();
+        // Cria uma lista observável a partir da lista obtida
         obsList = FXCollections.observableArrayList(list);
+        // Define a lista observável como itens da tabela
         tableViewAgenda.setItems(obsList);
+        // Inicializa os botões de edição e remoção
         initEditButtons();
         initRemoveButtons();
-        // Adicione esta linha para calcular e definir o total de linhas
+        // Calcula e define o total de linhas
         calculateAndSetTotalLines();
     }
 
-	// Cria um formulário de diálogo para adicionar ou editar um agenda.
-	private void createDialogForm(Agenda obj, String absoluteName, Stage parentStage) {
-		try {
-			FXMLLoader loader = new FXMLLoader(getClass().getResource(absoluteName));
-			Pane pane = loader.load();
+    // Cria um formulário de diálogo para adicionar ou editar uma agenda.
+    private void createDialogForm(Agenda obj, String absoluteName, Stage parentStage) {
+        try {
+            // Carrega o arquivo FXML do formulário
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(absoluteName));
+            // Carrega a pane do formulário
+            Pane pane = loader.load();
 
-			AgendaFormController controller = loader.getController();
-			controller.setAgenda(obj);
-			controller.setAgendaService(new AgendaService());
-			controller.subscribeDataChangeListener(this);
-			controller.updateFormData();
+            // Obtém o controlador do formulário
+            AgendaFormController controller = loader.getController();
+            // Seta a agenda no controlador
+            controller.setAgenda(obj);
+            // Seta o serviço de agenda no controlador
+            controller.setAgendaService(new AgendaService());
+            // Registra o listener de alteração de dados no controlador
+            controller.subscribeDataChangeListener(this);
+            // Atualiza os dados do formulário
+            controller.updateFormData();
 
-			Stage dialogStage = new Stage();
-			dialogStage.setTitle("Enter Agenda data");
-			dialogStage.setScene(new Scene(pane));
-			dialogStage.setResizable(false);
-			dialogStage.initOwner(parentStage);
-			dialogStage.initModality(Modality.WINDOW_MODAL);
-			dialogStage.showAndWait();
-		} catch (IOException e) {
-			e.printStackTrace();
-			Alerts.showAlert("IO Exception", "Error loading view", e.getMessage(), AlertType.ERROR);
-		}
-	}
-	
-	@FXML
-	public void handleSearch(ActionEvent event) {
-		try {
-			Long codAgenda = Long.valueOf(txtCodAgenda.getText());
-			Agenda agenda = service.findByCodAgenda(codAgenda);
-			// Limpa a lista de dados da tabela
-			tableViewAgenda.getItems().clear();
+            // Cria uma nova janela para exibir o formulário
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Enter Agenda data");
+            dialogStage.setScene(new Scene(pane));
+            dialogStage.setResizable(false);
+            dialogStage.initOwner(parentStage);
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            dialogStage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+            // Exibe um alerta em caso de erro ao carregar a view
+            Alerts.showAlert("IO Exception", "Error loading view", e.getMessage(), AlertType.ERROR);
+        }
+    }
 
-			// Verifica se a agenda foi encontrada
-			if (agenda != null) {
-				// Adiciona o resultado da pesquisa à lista de itens da tabela
-				tableViewAgenda.getItems().add(agenda);
-			} else {
-				// A agenda não foi encontrada, você pode exibir uma mensagem ao usuário
-				System.out.println("Agenda não encontrada para o código: " + codAgenda);
-			}
+    // Método chamado quando o botão de pesquisa por código é acionado
+    @FXML
+    public void handleSearch(ActionEvent event) {
+        try {
+            // Obtém o código da agenda a ser pesquisada
+            Long codAgenda = Long.valueOf(txtCodAgenda.getText());
+            // Encontra a agenda pelo código
+            Agenda agenda = service.findByCodAgenda(codAgenda);
+            // Limpa a lista de dados da tabela
+            tableViewAgenda.getItems().clear();
 
-		} catch (NumberFormatException e) {
-			// Lida com a exceção se o texto não for um número
-			// (você pode exibir uma mensagem de erro, por exemplo)
-			e.printStackTrace(); // Substitua por uma lógica apropriada
-		}
-	}
+            // Verifica se a agenda foi encontrada
+            if (agenda != null) {
+                // Adiciona o resultado da pesquisa à lista de itens da tabela
+                tableViewAgenda.getItems().add(agenda);
+            } else {
+                // A agenda não foi encontrada, exibe uma mensagem ao usuário
+                System.out.println("Agenda não encontrada para o código: " + codAgenda);
+            }
 
+        } catch (NumberFormatException e) {
+            // Lida com a exceção se o texto não for um número
+            // (pode ser substituído por uma lógica apropriada)
+            e.printStackTrace();
+        }
+    }
 
-	@FXML
-	public void PesquisarTipoDoc(ActionEvent event) {
-	    try {
-	        TipoDoc tipoDoc = comboTipoDoc.getValue(); // Obtenha o valor selecionado do ComboBox
-	        int dias = Integer.parseInt(txtDias.getText()); // Obtenha o valor do campo txtDias como um inteiro
-	        List<Agenda> agendas = service.findAllByTipoDoc(tipoDoc, dias);
-	        // Limpa a lista de dados da tabela
-	        tableViewAgenda.getItems().clear();
+    // Método chamado quando o botão de pesquisa por tipo de documento é acionado
+    @FXML
+    public void PesquisarTipoDoc(ActionEvent event) {
+        try {
+            // Obtém o tipo de documento selecionado no ComboBox
+            TipoDoc tipoDoc = comboTipoDoc.getValue();
+            // Obtém o número de dias do campo txtDias como um inteiro
+            int dias = Integer.parseInt(txtDias.getText());
+            // Encontra as agendas pelo tipo de documento e número de dias
+            List<Agenda> agendas = service.findAllByTipoDoc(tipoDoc, dias);
+            // Limpa a lista de dados da tabela
+            tableViewAgenda.getItems().clear();
 
-	        // Verifica se a lista de agendas não está vazia
-	        if (!agendas.isEmpty()) {
-	            // Adiciona os resultados da pesquisa à lista de itens da tabela
-	            tableViewAgenda.getItems().addAll(agendas);
-	        } else {
-	            // A lista de agendas está vazia, você pode exibir uma mensagem ao usuário
-	            System.out.println("Nenhuma agenda encontrada para o tipo de documento: " + tipoDoc);
-	        }
+            // Verifica se a lista de agendas não está vazia
+            if (!agendas.isEmpty()) {
+                // Adiciona os resultados da pesquisa à lista de itens da tabela
+                tableViewAgenda.getItems().addAll(agendas);
+            } else {
+                // A lista de agendas está vazia, exibe uma mensagem ao usuário
+                System.out.println("Nenhuma agenda encontrada para o tipo de documento: " + tipoDoc);
+            }
 
-	        // Adicione esta linha para calcular e definir o total de linhas
-	        calculateAndSetTotalLines();
+            // Calcula e define o total de linhas
+            calculateAndSetTotalLines();
 
-	    } catch (Exception e) {
-	        // Lida com a exceção (você pode exibir uma mensagem de erro, por exemplo)
-	        e.printStackTrace(); // Substitua por uma lógica apropriada
-	    } 
-	}
-	
-	// Chamado quando os dados são alterados.
-	@Override
-	public void onDataChanged() {
-		updateTableView();
-	}
-	
+        } catch (Exception e) {
+            // Lida com a exceção (pode ser substituído por uma lógica apropriada)
+            e.printStackTrace();
+        } 
+    }
 
-	// Inicializa os botões de edição.
-	private void initEditButtons() {
-	    tableColumnEDIT.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
+    // Chamado quando os dados são alterados.
+    @Override
+    public void onDataChanged() {
+        // Atualiza a tabela ao detectar alterações nos dados
+        updateTableView();
+    }
 
-	    tableColumnEDIT.setCellFactory(param -> new TableCell<Agenda, Agenda>() {
-	        private final Button button = new Button("edit");
+    // Inicializa os botões de edição.
+    private void initEditButtons() {
+        // Define a fábrica de células para a coluna de edição
+        tableColumnEDIT.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
 
-	        @Override
-	        protected void updateItem(Agenda obj, boolean empty) {
-	            super.updateItem(obj, empty);
-	            if (obj == null || obj.getInd_situacao() != SituacaoProcessamento.AGENDADO) {
-	                setGraphic(null);
-	                return;
-	            }
-	            setGraphic(button);
-	            button.setOnAction(event -> createDialogForm(obj, "/gui/AgendaForm.fxml", Utils.currentStage(event)));
-	        }
-	    });
+        tableColumnEDIT.setCellFactory(param -> new TableCell<Agenda, Agenda>() {
+            private final Button button = new Button("edit");
 
-	    // Defina a largura da coluna aqui ou em outro lugar do seu código
-	    tableColumnEDIT.setPrefWidth(60);
-	}
+            @Override
+            protected void updateItem(Agenda obj, boolean empty) {
+                super.updateItem(obj, empty);
+                // Verifica se o objeto não é nulo e está agendado para edição
+                if (obj == null || obj.getInd_situacao() != SituacaoProcessamento.AGENDADO) {
+                    setGraphic(null);
+                    return;
+                }
+                // Configura o botão e ação para abrir o formulário de edição
+                setGraphic(button);
+                button.setOnAction(event -> createDialogForm(obj, "/gui/AgendaForm.fxml", Utils.currentStage(event)));
+            }
+        });
 
+        // Define a largura da coluna
+        tableColumnEDIT.setPrefWidth(60);
+    }
 
+    // Inicializa os botões de remoção.
+    private void initRemoveButtons() {
+        // Define a fábrica de células para a coluna de remoção
+        tableColumnREMOVE.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
 
+        tableColumnREMOVE.setCellFactory(param -> new TableCell<Agenda, Agenda>() {
+            private final Button button = new Button("remove");
 
-	// Inicializa os botões de remoção.
-	private void initRemoveButtons() {
-		tableColumnREMOVE.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
-		tableColumnREMOVE.setCellFactory(param -> new TableCell<Agenda, Agenda>() {
-			private final Button button = new Button("remove");
+            @Override
+            protected void updateItem(Agenda obj, boolean empty) {
+                super.updateItem(obj, empty);
+                // Verifica se o objeto não é nulo e está agendado para remoção
+                if (obj == null || obj.getInd_situacao() != SituacaoProcessamento.AGENDADO) {
+                    setGraphic(null);
+                    return;
+                }
+                // Configura o botão e ação para remover a agenda
+                setGraphic(button);
+                button.setOnAction(event -> removeEntity(obj));
+            }
+        });
 
-			@Override
-			protected void updateItem(Agenda obj, boolean empty) {
-				super.updateItem(obj, empty);
-				if (obj == null || obj.getInd_situacao() != SituacaoProcessamento.AGENDADO) {
-					setGraphic(null);
-					return;
-				}
-				setGraphic(button);
-				button.setOnAction(event -> removeEntity(obj));
-			}
-		});
-	    // Defina a largura da coluna aqui ou em outro lugar do seu código
-		tableColumnREMOVE.setPrefWidth(120);
-	}
+        // Define a largura da coluna
+        tableColumnREMOVE.setPrefWidth(120);
+    }
 
-	// Remove um agenda após confirmação.
-	private void removeEntity(Agenda obj) {
-		Optional<ButtonType> result = Alerts.showConfirmation("Confirmation", "Are you sure to delete?");
+    // Remove uma agenda após confirmação.
+    private void removeEntity(Agenda obj) {
+        // Exibe um diálogo de confirmação
+        Optional<ButtonType> result = Alerts.showConfirmation("Confirmation", "Are you sure to delete?");
 
-		if (result.get() == ButtonType.OK) {
-			if (service == null) {
-				throw new IllegalStateException("Service was null");
-			}
-			try {
-				service.remove(obj);
-				updateTableView();
-			} catch (DbIntegrityException e) {
-				Alerts.showAlert("Error removing object", null, e.getMessage(), AlertType.ERROR);
-			}
-		}
-	}
-
+        if (result.get() == ButtonType.OK) {
+            // Verifica se o serviço está inicializado
+            if (service == null) {
+                throw new IllegalStateException("Service was null");
+            }
+            try {
+                // Remove a agenda do serviço
+                service.remove(obj);
+                // Atualiza a tabela após a remoção
+                updateTableView();
+            } catch (DbIntegrityException e) {
+                // Exibe um alerta em caso de erro na remoção
+                Alerts.showAlert("Error removing object", null, e.getMessage(), AlertType.ERROR);
+            }
+        }
+    }
 }
