@@ -306,11 +306,15 @@ public class AgendaFormController implements Initializable {
                     
                     // Limpa o valor de txtInicio
                     datePickerInicio.setValue(null);
-
+                    
                     // Set comboSituacao como AGENDADO
                     if (comboSituacao.getItems().contains(SituacaoProcessamento.AGENDADO)) {
                         comboSituacao.getSelectionModel().select(SituacaoProcessamento.AGENDADO);
                     }
+                    
+                 // 6. Configura o valor do comboHoraInicio para o primeiro item
+                    comboHoraInicio.getSelectionModel().selectFirst();
+
                 }
             }
         });

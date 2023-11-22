@@ -48,7 +48,8 @@
 		</GridPane>
 		<Button fx:id="btSave" layoutX="101.0" layoutY="261.0" mnemonicParsing="false" onAction="#onBtSaveAction" text="Save" />
 		<Button fx:id="btCancel" layoutX="214.0" layoutY="262.0" mnemonicParsing="false" onAction="#onBtCancelAction" text="Cancel" />
-		<RadioButton fx:id="radioAutomatico" layoutX="124.0" layoutY="21.0" mnemonicParsing="false" text="Automático" selected="true"/>
-      <RadioButton fx:id="radioManual" layoutX="286.0" layoutY="20.0" mnemonicParsing="false" text="Manual" />
+		<RadioButton fx:id="radioAutomatico" layoutX="304.0" layoutY="24.0" mnemonicParsing="false" selected="true" text="Automático" />
+      <RadioButton fx:id="radioManual" layoutX="404.0" layoutY="23.0" mnemonicParsing="false" text="Manual" />
+      <Label layoutX="112.0" layoutY="23.0" text="Tipo de Intervalo de Geração: " />
 	</children>
 </AnchorPane>
